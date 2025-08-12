@@ -63,6 +63,10 @@ func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
 		return s.baseGDSolve()
 	} else if s.SmartMode == "lm" {
 		return s.lmSolve(minFunc, maxIterations)
+	} else if s.SmartMode == "lbfgs" {
+		return s.baseLBFGSSolve()
+	} else if s.SmartMode == "newton" {
+		return s.baseNewtonSolve()
 	}
 	return s.baseNMSolve()
 }
@@ -70,6 +74,22 @@ func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
 // How Simplex works http://195.134.76.37/applets/AppletSimplex/Appl_Simplex2.html
 func (s *Solver) baseNMSolve() Result {
 	log.Println("base NM Solve Mode")
+	
+	// Check if InitValues is empty or nil
+	if len(s.InitValues) == 0 {
+		log.Printf("ERROR: No initial values provided for optimization")
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
+	
+	log.Printf("Using initial values: %v", s.InitValues)
+	
 	problem := optimize.Problem{
 		Func: s.problem,
 	}
@@ -87,10 +107,18 @@ func (s *Solver) baseNMSolve() Result {
 		Concurrent:        10000,
 	}
 
-	res, _ := optimize.Minimize(problem, s.InitValues, settings, &optimize.NelderMead{})
-	//if err != nil {
-	//	panic(err)
-	//}
+	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.NelderMead{})
+	if err != nil {
+		log.Printf("Nelder-Mead optimization failed: %v", err)
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
 
 	payload := map[string]interface{}{
 		"majorIterations": res.MajorIterations,
@@ -140,10 +168,25 @@ func (s *Solver) baseLMSolve() Result {
 		Eps2:       1e-8,
 	}
 
-	res, _ := lm.LM(problem, &lm.Settings{Iterations: 1000000, ObjectiveTol: 1e-16})
-	//if err != nil {
-	//	panic(err)
-	//}
+	// Recover from LM panics (e.g., singular matrix)
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("LM optimization panicked: %v", r)
+		}
+	}()
+	
+	res, err := lm.LM(problem, &lm.Settings{Iterations: 1000000, ObjectiveTol: 1e-16})
+	if err != nil {
+		log.Printf("LM optimization failed: %v", err)
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
 
 	return Result{
 		Params:  res.X,
@@ -236,7 +279,7 @@ func (s *Solver) eisSolve(minFunc float64, maxIterations int) Result {
 
 	primaryValues := s.InitValues
 	iterations := 0
-	elements := getElements(s.code)
+	elements := GetElements(s.code)
 	log.Println("elements:", elements)
 
 	for iterations < maxIterations {
@@ -294,7 +337,7 @@ func (s *Solver) lmSolve(minFunc float64, maxIterations int) Result {
 		if res.Min < minFunc {
 			break
 		} else {
-			s.InitValues = modifyParams(res.Params, res.Min > lastMin, primaryInitValues, lastValues, getElements(s.code))
+			s.InitValues = modifyParams(res.Params, res.Min > lastMin, primaryInitValues, lastValues, GetElements(s.code))
 		}
 		lastMin = res.Min
 		lastValues = res.Params
@@ -440,7 +483,7 @@ func GetModulo(data [][2]float64) []float64 {
 	return res
 }
 
-func getElements(code string) []string {
+func GetElements(code string) []string {
 	var elements []string
 	for _, char := range code {
 		switch char {
@@ -485,6 +528,123 @@ func scaleParams(params *[]float64, elements []string, scale float64) {
 func scaleData(impData *[][2]float64, scale float64) {
 	for i, v := range *impData {
 		(*impData)[i] = [2]float64{v[0] * scale, v[1] * scale}
+	}
+}
+
+func (s *Solver) baseLBFGSSolve() Result {
+	log.Println("Base LBFGS Solve Mode")
+	grad := func(grad, x []float64) {
+		fd.Gradient(grad, s.problem, x, &fd.Settings{
+			Formula:     fd.Formula{},
+			Step:        0,
+			OriginKnown: false,
+			OriginValue: 0,
+			Concurrent:  false,
+		})
+	}
+
+	status := func() (optimize.Status, error) {
+		return 0, nil
+	}
+
+	problem := optimize.Problem{
+		Func:   s.problem,
+		Grad:   grad,
+		Status: status,
+	}
+
+	settings := &optimize.Settings{
+		InitValues:        nil,
+		GradientThreshold: 0,
+		Converger:         nil,
+		MajorIterations:   0,
+		Runtime:           0,
+		FuncEvaluations:   0,
+		GradEvaluations:   0,
+		HessEvaluations:   0,
+		Recorder:          nil,
+		Concurrent:        10000,
+	}
+
+	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.LBFGS{})
+	if err != nil {
+		log.Printf("LBFGS optimization error: %v", err)
+		return Result{Min: math.Inf(1), Status: "ERROR"}
+	}
+
+	payload := map[string]interface{}{
+		"majorIterations": res.MajorIterations,
+		"funcEvaluations": res.FuncEvaluations,
+	}
+
+	return Result{
+		Params:  res.X,
+		Min:     res.F,
+		MinUnit: "ChiSq",
+		Runtime: float64(res.Runtime / 1000),
+		Status:  OK,
+		Payload: payload,
+	}
+}
+
+func (s *Solver) baseNewtonSolve() Result {
+	log.Println("Base Newton Solve Mode")
+	grad := func(grad, x []float64) {
+		fd.Gradient(grad, s.problem, x, &fd.Settings{
+			Formula:     fd.Formula{},
+			Step:        0,
+			OriginKnown: false,
+			OriginValue: 0,
+			Concurrent:  false,
+		})
+	}
+
+	hess := func(h *mat.SymDense, x []float64) {
+		fd.Hessian(h, s.problem, x, nil)
+	}
+
+	status := func() (optimize.Status, error) {
+		return 0, nil
+	}
+
+	problem := optimize.Problem{
+		Func:   s.problem,
+		Grad:   grad,
+		Hess:   hess,
+		Status: status,
+	}
+
+	settings := &optimize.Settings{
+		InitValues:        nil,
+		GradientThreshold: 0,
+		Converger:         nil,
+		MajorIterations:   0,
+		Runtime:           0,
+		FuncEvaluations:   0,
+		GradEvaluations:   0,
+		HessEvaluations:   0,
+		Recorder:          nil,
+		Concurrent:        10000,
+	}
+
+	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.Newton{})
+	if err != nil {
+		log.Printf("Newton optimization error: %v", err)
+		return Result{Min: math.Inf(1), Status: "ERROR"}
+	}
+
+	payload := map[string]interface{}{
+		"majorIterations": res.MajorIterations,
+		"funcEvaluations": res.FuncEvaluations,
+	}
+
+	return Result{
+		Params:  res.X,
+		Min:     res.F,
+		MinUnit: "ChiSq",
+		Runtime: float64(res.Runtime / 1000),
+		Status:  OK,
+		Payload: payload,
 	}
 }
 

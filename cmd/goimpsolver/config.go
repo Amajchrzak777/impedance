@@ -22,24 +22,26 @@ func (a *ArrayFlags) Set(value string) error {
 }
 
 type Config struct {
-	Code        string
-	File        string
-	InitValues  ArrayFlags  // Changed from cmd.ArrayFlags
-	CutLow      uint
-	CutHigh     uint
-	Unity       bool
-	SmartMode   string
-	Flip        bool
-	ImgOut      bool
-	ImgSave     bool
-	ImgPath     string
-	ImgDPI      uint
-	ImgSize     uint
-	Concurrency bool
-	Threads     uint
-	Jobs        uint
-	Quiet       bool
-	HTTPServer  bool
+	Code         string
+	File         string
+	InitValues   ArrayFlags  // Changed from cmd.ArrayFlags
+	CutLow       uint
+	CutHigh      uint
+	Unity        bool
+	SmartMode    string
+	OptimMethod  string      // New field for optimization method selection
+	Benchmark    bool        // Enable benchmark mode with timing
+	Flip         bool
+	ImgOut       bool
+	ImgSave      bool
+	ImgPath      string
+	ImgDPI       uint
+	ImgSize      uint
+	Concurrency  bool
+	Threads      uint
+	Jobs         uint
+	Quiet        bool
+	HTTPServer   bool
 }
 
 type EISDataPoint struct {
