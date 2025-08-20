@@ -1,0 +1,31 @@
+📁 Loading impedance data from CSV files...
+{
+    "batch_id": "csv_batch_1755722093",
+    "timestamp": "2025-08-20T20:34:53Z",
+    "spectra": [
+        {
+            "iteration": 0,
+            "impedance_data": {
+                "timestamp": "2025-08-20T20:34:54Z",
+                "frequencies": [],
+                "magnitude": [],
+                "phase": [],
+                "impedance": [
+
+                ]
+            }
+        },
+        {
+            "iteration": 1,
+            "impedance_data": {
+                "timestamp": "2025-08-20T20:34:55Z",
+                "frequencies": [],
+                "magnitude": [],
+                "phase": [],
+                "impedance": [
+
+                ]
+            }
+        }
+    ]
+}

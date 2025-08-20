@@ -56,6 +56,26 @@ func (s *Solver) problem(x []float64) float64 {
 	return ChiSq(s.Observed, calculated, s.Weighting)
 }
 
+func (s *Solver) problemWithQnConstraints(x []float64) float64 {
+	calculated := CircuitImpedance(s.code, s.Freqs, x)
+	chiSq := ChiSq(s.Observed, calculated, s.Weighting)
+
+	// Add penalty for Qn parameters outside [0.1, 1.0]
+	penalty := 0.0
+	elements := GetElements(s.code)
+	for i, elem := range elements {
+		if elem == "qn" && i < len(x) {
+			if x[i] < 0.1 {
+				penalty += 1e6 * math.Pow(0.1-x[i], 2)
+			} else if x[i] > 1.0 {
+				penalty += 1e6 * math.Pow(x[i]-1.0, 2)
+			}
+		}
+	}
+
+	return chiSq + penalty
+}
+
 func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
 	if s.SmartMode == "eis" {
 		return s.eisSolve(minFunc, maxIterations)
@@ -74,7 +94,7 @@ func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
 // How Simplex works http://195.134.76.37/applets/AppletSimplex/Appl_Simplex2.html
 func (s *Solver) baseNMSolve() Result {
 	log.Println("base NM Solve Mode")
-	
+
 	// Check if InitValues is empty or nil
 	if len(s.InitValues) == 0 {
 		log.Printf("ERROR: No initial values provided for optimization")
@@ -87,11 +107,11 @@ func (s *Solver) baseNMSolve() Result {
 			Payload: nil,
 		}
 	}
-	
+
 	log.Printf("Using initial values: %v", s.InitValues)
-	
+
 	problem := optimize.Problem{
-		Func: s.problem,
+		Func: s.problemWithQnConstraints,
 	}
 
 	settings := &optimize.Settings{
@@ -174,7 +194,7 @@ func (s *Solver) baseLMSolve() Result {
 			log.Printf("LM optimization panicked: %v", r)
 		}
 	}()
-	
+
 	res, err := lm.LM(problem, &lm.Settings{Iterations: 1000000, ObjectiveTol: 1e-16})
 	if err != nil {
 		log.Printf("LM optimization failed: %v", err)
@@ -420,34 +440,32 @@ func findClosest(a []float64, x float64) int {
 
 func modifyParams(values []float64, diff bool, primaryValues []float64, lastValues []float64, elements []string) []float64 {
 	for i, n := range values {
+		// Only fix clearly unphysical negative values by reverting to primary values
 		if n < 0 {
 			values[i] = primaryValues[i]
 		}
-		//if diff {
-		//	values[i] = n - primaryValues[i]*0.1
-		//} else {
-		//	values[i] = n + primaryValues[i]*0.1
-		//}
 
-		//if elements[i] == "r" && ((n >= 1000000) || (n < 0)) {
-		//	values[i] = primaryValues[i]
-		//}
-
-		if elements[i] == "qn" && (n > 1) {
-			values[i] = 1
+		// Log CPE exponent n values (constraints now handled by optimizer bounds)
+		if elements[i] == "qn" {
+			log.Printf("DEBUG: CPE exponent n=%.6f", n)
 		}
 
-		if elements[i] == "qn" && (n < 0) {
-			values[i] = 0
+		// Apply constraints for other parameters
+		if elements[i] == "r" && n > 1e6 {
+			log.Printf("WARNING: Resistance %.3e is extremely high, clamping", n)
+			values[i] = primaryValues[i]
 		}
 
+		if elements[i] == "qy" && (n < 1e-12 || n > 1e-2) {
+			log.Printf("WARNING: CPE Y0 %.3e is outside reasonable range, clamping", n)
+			values[i] = primaryValues[i]
+		}
+
+		// Only apply gentle parameter adjustments for optimization convergence
 		switch elements[i] {
 		case "r", "c", "qy":
 			values[i] = values[i] * 1.1
 		}
-		//if (elements[i] == "c" || elements[i] == "qy") && n > 1e-3 {
-		//	values[i] = 1e-5
-		//}
 	}
 	return values
 }
@@ -517,9 +535,17 @@ func scaleParams(params *[]float64, elements []string, scale float64) {
 	// TODO: implement "gy", "gk", "fy", "fk", "fa"
 	for i, v := range elements {
 		switch v {
-		case "r", "qn", "ob", "ty", "tb":
+		case "r":
+			// Resistance scales with impedance
 			(*params)[i] = (*params)[i] * scale
 		case "c", "w", "qy", "oy":
+			// Capacitance, Warburg, CPE Y0 scale inversely with impedance
+			(*params)[i] = (*params)[i] * 1 / scale
+		case "qn", "ob", "tb":
+			// CPE exponent n, Warburg length parameters B are dimensionless - no scaling
+			// Leave (*params)[i] unchanged
+		case "ty":
+			// Transmission line Y0 scales inversely like admittance
 			(*params)[i] = (*params)[i] * 1 / scale
 		}
 	}

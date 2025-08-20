@@ -24,10 +24,10 @@ func main() {
 
 	flag.StringVar(&config.Code, "c", "R(CR)", "Boukamp Circuit Description code")
 	flag.StringVar(&config.File, "f", "ASTM0.txt", "Measurement data file")
-	flag.Var(&config.InitValues, "v", "Parameters init values (array)")
-	flag.UintVar(&config.CutLow, "b", 0, "Cut X of begining frequencies from a file")
-	flag.UintVar(&config.CutHigh, "e", 0, "Cut X of ending frequencies from a file")
-	flag.BoolVar(&config.Unity, "unity", false, "Use Unity weighting intead Modulus")
+	flag.Var(&config.InitValues, "v", "Parameters init values (array)")               // for better fit the EIS
+	flag.UintVar(&config.CutLow, "b", 0, "Cut X of begining frequencies from a file") // am not using
+	flag.UintVar(&config.CutHigh, "e", 0, "Cut X of ending frequencies from a file")  // am not using
+	flag.BoolVar(&config.Unity, "unity", false, "Use Unity weighting intead Modulus") // UNITY problematic data more focused on small values
 	flag.StringVar(&config.SmartMode, "m", "eis", "Smart mode")
 	flag.StringVar(&config.OptimMethod, "optim", "nelder-mead", "Optimization method: nelder-mead, levenberg-marquardt, gradient-descent, lbfgs, newton, or all")
 	flag.BoolVar(&config.Benchmark, "benchmark", false, "Enable benchmark mode with timing (saves to benchmark_results.csv)")
@@ -114,7 +114,8 @@ func runSingleOptimizationMethod(code string, freqs []float64, impData [][2]floa
 	duration := time.Since(startTime)
 
 	// Ensure consistent chi-square calculation for all methods
-	if res.Status != "ERROR" && len(res.Params) > 0 && (res.MinUnit != "ChiSq" || method != "levenberg-marquardt") {
+	// Skip recalculation for EIS mode as it handles scaling internally
+	if res.Status != "ERROR" && len(res.Params) > 0 && (res.MinUnit != "ChiSq" || method != "levenberg-marquardt") && cfg.SmartMode != "eis" {
 		// Debug the recalculation process
 		theoreticalImp := goimpcore.CircuitImpedance(code, freqs, res.Params)
 
@@ -129,6 +130,8 @@ func runSingleOptimizationMethod(code string, freqs []float64, impData [][2]floa
 			res.Min = actualChiSq
 			res.MinUnit = "ChiSq"
 		}
+	} else if cfg.SmartMode == "eis" {
+		log.Printf("INFO: Skipping chi-square recalculation for EIS mode (scaling handled internally)")
 	}
 
 	if res.Status == "ERROR" {
