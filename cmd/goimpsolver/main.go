@@ -22,7 +22,7 @@ const (
 func main() {
 	config := new(Config)
 
-	flag.StringVar(&config.Code, "c", "R(CR)", "Boukamp Circuit Description code")
+	flag.StringVar(&config.Code, "c", "R(CR)(CR)", "Boukamp Circuit Description code")
 	flag.StringVar(&config.File, "f", "ASTM0.txt", "Measurement data file")
 	flag.Var(&config.InitValues, "v", "Parameters init values (array)")               // for better fit the EIS
 	flag.UintVar(&config.CutLow, "b", 0, "Cut X of begining frequencies from a file") // am not using
@@ -401,6 +401,9 @@ func generateInitialValues(code string) []float64 {
 	case "r(qr)":
 		// R1, Q1_Y0, Q1_n, R2
 		return []float64{50.0, 1e-6, 0.8, 100.0}
+	case "r(cr)(cr)":
+		// R1, C1, R2, C2, R3 (5 parameters)
+		return []float64{50.0, 1e-6, 100.0, 1e-6, 100.0}
 	case "r(q(r(qr)))":
 		// R1, Q1_Y0, Q1_n, R2, Q2_Y0, Q2_n, R3
 		return []float64{50.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0}

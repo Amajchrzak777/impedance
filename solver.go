@@ -440,6 +440,11 @@ func findClosest(a []float64, x float64) int {
 
 func modifyParams(values []float64, diff bool, primaryValues []float64, lastValues []float64, elements []string) []float64 {
 	for i, n := range values {
+		// Safety check: skip if element index is out of bounds
+		if i >= len(elements) {
+			continue
+		}
+
 		// Only fix clearly unphysical negative values by reverting to primary values
 		if n < 0 {
 			values[i] = primaryValues[i]

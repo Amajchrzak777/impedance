@@ -19,7 +19,7 @@ create_test_batch() {
     
     # Generate JSON with all 12 CSV files
     echo '{' > test_batch.json
-    echo '    "batch_id": "manual_test_batch_12",' >> test_batch.json
+    echo '    "batch_id": "first_approach",' >> test_batch.json
     echo '    "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",' >> test_batch.json
     echo '    "spectra": [' >> test_batch.json
     
