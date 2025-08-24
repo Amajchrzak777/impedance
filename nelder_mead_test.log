@@ -1,0 +1,1097 @@
+=== Manual Concurrent Processing Test ===
+
+🔄 Cleaning up existing servers...
+Building server...
+✅ Server built
+
+📁 Creating test batch with all 12 impedance files...
+🔄 Loading impedance_data_001.csv...
+✅ Loaded 22 points from impedance_data_001.csv
+🔄 Loading impedance_data_002.csv...
+✅ Loaded 22 points from impedance_data_002.csv
+🔄 Loading impedance_data_003.csv...
+✅ Loaded 22 points from impedance_data_003.csv
+🔄 Loading impedance_data_004.csv...
+✅ Loaded 22 points from impedance_data_004.csv
+🔄 Loading impedance_data_005.csv...
+✅ Loaded 22 points from impedance_data_005.csv
+🔄 Loading impedance_data_006.csv...
+✅ Loaded 22 points from impedance_data_006.csv
+🔄 Loading impedance_data_007.csv...
+✅ Loaded 22 points from impedance_data_007.csv
+🔄 Loading impedance_data_008.csv...
+✅ Loaded 22 points from impedance_data_008.csv
+🔄 Loading impedance_data_009.csv...
+✅ Loaded 22 points from impedance_data_009.csv
+🔄 Loading impedance_data_010.csv...
+✅ Loaded 22 points from impedance_data_010.csv
+🔄 Loading impedance_data_011.csv...
+✅ Loaded 22 points from impedance_data_011.csv
+🔄 Loading impedance_data_012.csv...
+✅ Loaded 22 points from impedance_data_012.csv
+✅ Test batch created with 12 spectra from real CSV files
+
+🧵 Testing with 12 goroutines (12 spectra)...
+📡 Starting server...
+2025/08/24 13:19:22 🔧 Worker pool started with 12 workers
+2025/08/24 13:19:22 📊 Profiling disabled
+2025/08/24 13:19:22 🚀 Starting HTTP server on port 8080
+2025/08/24 13:19:22 📡 Endpoints available:
+2025/08/24 13:19:22   - Single: http://localhost:8080/eis-data
+2025/08/24 13:19:22   - Batch:  http://localhost:8080/eis-data/batch
+2025/08/24 13:19:22   - Health: http://localhost:8080/health
+2025/08/24 13:19:22   - GC:     http://localhost:8080/debug/gc
+2025/08/24 13:19:22   - Memory: http://localhost:8080/debug/memory
+✅ Server started (PID: 63735)
+📤 Sending batch request...
+2025/08/24 13:19:25 🔄 Batch processing started - ID: optimized_worker_pool_12, Spectra: 12
+2025/08/24 13:19:25 DEBUG: Processing spectrum 0 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 1 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 2 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 3 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 4 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 5 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 6 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 7 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 8 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 9 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 10 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: Processing spectrum 11 with 22 frequencies and 22 impedance points
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:nelder-mead Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 Using optimization method: nelder-mead
+2025/08/24 13:19:25 EIS Solve Mode
+InitValues: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 elements: [r qy qn r]
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.575901594202213 [0.04879985373538802 24.581467706175033 1.0000000006588579 106.39002526142656] OK false 0 0 r(qr) ChiSq map[funcEvaluations:727 majorIterations:404] 11698}
+2025/08/24 13:19:25 iter: 0 res: 0.575901594202213 bestRes 0.575901594202213
+2025/08/24 13:19:25 WARNING: CPE Y0 2.458e+01 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=1.000000
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053679839108926826 1.1e-06 1.0000000006588579 117.02902778756922]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5772781176611655 [0.04819188977302063 24.31435147981066 1.0000000006287417 106.56769737570657] OK false 0 0 r(qr) ChiSq map[funcEvaluations:723 majorIterations:396] 15323}
+2025/08/24 13:19:25 iter: 0 res: 0.5772781176611655 bestRes 0.5772781176611655
+2025/08/24 13:19:25 WARNING: CPE Y0 2.431e+01 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=1.000000
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053011078750322696 1.1e-06 1.0000000006287417 117.22446711327724]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5749482284821935 [0.04930886616103358 2275.7826497876604 0.7976611028529697 -398.18124953332443] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1167 majorIterations:650] 20899}
+2025/08/24 13:19:25 iter: 0 res: 0.5749482284821935 bestRes 0.5749482284821935
+2025/08/24 13:19:25 WARNING: CPE Y0 2.276e+03 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.797661
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423975277713695 1.1e-06 0.7976611028529697 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5765651515238713 [0.04855877354422484 24.285709973223724 1.0000000011538974 106.68425613510364] OK false 0 0 r(qr) ChiSq map[funcEvaluations:698 majorIterations:392] 22641}
+2025/08/24 13:19:25 iter: 0 res: 0.5765651515238713 bestRes 0.5765651515238713
+2025/08/24 13:19:25 WARNING: CPE Y0 2.429e+01 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=1.000000
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053414650898647324 1.1e-06 1.0000000011538974 117.35268174861402]
+2025/08/24 13:19:25 init: [0.053679839108926826 1.1e-06 1.0000000006588579 117.02902778756922]
+2025/08/24 13:19:25 resl: {0.5756258611640752 [0.04879988773739238 3.74623670656791e+10 0.9961057551080075 -9.577141432255692e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:887 majorIterations:535] 11826}
+2025/08/24 13:19:25 iter: 1 res: 0.5756258611640752 bestRes 0.5756258611640752
+2025/08/24 13:19:25 WARNING: CPE Y0 3.746e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.996106
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053679876511131625 1.1e-06 0.9961057551080075 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053011078750322696 1.1e-06 1.0000000006287417 117.22446711327724]
+2025/08/24 13:19:25 resl: {0.5769975219858209 [0.0481919718656921 1.5074440733689792e+11 0.9344388974891198 -4.266545627388749e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:816 majorIterations:491] 10932}
+2025/08/24 13:19:25 iter: 1 res: 0.5769975219858209 bestRes 0.5769975219858209
+2025/08/24 13:19:25 WARNING: CPE Y0 1.507e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.934439
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05301116905226132 1.1e-06 0.9344388974891198 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5765974259701712 [0.04904652988862028 1.526992526418945e+11 0.950746617667098 -1.6856466713304482e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1599 majorIterations:925] 27591}
+2025/08/24 13:19:25 iter: 0 res: 0.5765974259701712 bestRes 0.5765974259701712
+2025/08/24 13:19:25 WARNING: CPE Y0 1.527e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.950747
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395118287748231 1.1e-06 0.950746617667098 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5719421662563167 [0.04885557155741373 4.198755416720299e+10 0.9868373038929734 -1.0010291260007216e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1914 majorIterations:1105] 32361}
+2025/08/24 13:19:25 iter: 0 res: 0.5719421662563167 bestRes 0.5719421662563167
+2025/08/24 13:19:25 WARNING: CPE Y0 4.199e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.986837
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053741128713155104 1.1e-06 0.9868373038929734 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5761777836106254 [0.04849299085154321 2.2017296923909073e+10 0.995317928519546 -1.3253455234689331e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1926 majorIterations:1103] 32981}
+2025/08/24 13:19:25 iter: 0 res: 0.5761777836106254 bestRes 0.5761777836106254
+2025/08/24 13:19:25 WARNING: CPE Y0 2.202e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995318
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334228993669753 1.1e-06 0.995317928519546 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05423975277713695 1.1e-06 0.7976611028529697 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355610665 [0.04930904518309105 3.1241298350058517e+10 0.9970853254373007 -2.5961826795022297e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:827 majorIterations:500] 12472}
+2025/08/24 13:19:25 iter: 1 res: 0.5749402355610665 bestRes 0.5749402355610665
+2025/08/24 13:19:25 WARNING: CPE Y0 3.124e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.997085
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423994970140016 1.1e-06 0.9970853254373007 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5756672923265097 [0.04895820759066927 9.107816142564236e+10 0.8698825169973494 -1.581407946366677e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1775 majorIterations:1033] 36269}
+2025/08/24 13:19:25 iter: 0 res: 0.5756672923265097 bestRes 0.5756672923265097
+2025/08/24 13:19:25 WARNING: CPE Y0 9.108e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.869883
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0538540283497362 1.1e-06 0.8698825169973494 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5722585637722646 [0.04895018266202028 1.4780135496941513e+10 0.8693129231510657 -1.0881201998003262e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1718 majorIterations:991] 36758}
+2025/08/24 13:19:25 iter: 0 res: 0.5722585637722646 bestRes 0.5722585637722646
+2025/08/24 13:19:25 WARNING: CPE Y0 1.478e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.869313
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053845200928222314 1.1e-06 0.8693129231510657 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053414650898647324 1.1e-06 1.0000000011538974 117.35268174861402]
+2025/08/24 13:19:25 resl: {0.5762840501147359 [0.048558797273314705 8.576292101270525e+10 0.9965819471345596 -2.4704842045849384e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:798 majorIterations:494] 15154}
+2025/08/24 13:19:25 iter: 1 res: 0.5762840501147359 bestRes 0.5762840501147359
+2025/08/24 13:19:25 WARNING: CPE Y0 8.576e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.996582
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341467700064618 1.1e-06 0.9965819471345596 110.00000000000001]
+✅ Request successful in .026947000s
+⏳ Waiting 15 seconds for 12 EIS optimizations to complete...
+📊 Processing status:
+.2025/08/24 13:19:25 init: [0.05301116905226132 1.1e-06 0.9344388974891198 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219858702 [0.048191968050983455 7.36086774262194e+10 0.9684862595809317 -5.2230381940757706e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:772 majorIterations:472] 14494}
+2025/08/24 13:19:25 iter: 2 res: 0.5769975219858702 bestRes 0.5769975219858209
+2025/08/24 13:19:25 WARNING: CPE Y0 7.361e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.968486
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0530111648560818 1.1e-06 0.9684862595809317 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5755072201099941 [0.04857291487262147 1.837480525966108e+10 0.9496399269349759 -1.1192694159692426e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:2004 majorIterations:1155] 42386}
+2025/08/24 13:19:25 iter: 0 res: 0.5755072201099941 bestRes 0.5755072201099941
+2025/08/24 13:19:25 WARNING: CPE Y0 1.837e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.949640
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053430206359883624 1.1e-06 0.9496399269349759 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334228993669753 1.1e-06 0.995317928519546 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836103863 [0.04849299185580211 1.0850111354755365e+11 0.9552790077178193 -5.724058632421353e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:815 majorIterations:497] 9639}
+2025/08/24 13:19:25 iter: 1 res: 0.5761777836103863 bestRes 0.5761777836103863
+2025/08/24 13:19:25 WARNING: CPE Y0 1.085e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.955279
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229104138232 1.1e-06 0.9552790077178193 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053679876511131625 1.1e-06 0.9961057551080075 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611640228 [0.04879987632145644 5.375728367763783e+10 0.9756662520261048 -2.844525576882348e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:785 majorIterations:474] 19937}
+2025/08/24 13:19:25 iter: 2 res: 0.5756258611640228 bestRes 0.5756258611640228
+2025/08/24 13:19:25 WARNING: CPE Y0 5.376e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.975666
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367986395360209 1.1e-06 0.9756662520261048 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5746873314699577 [0.04918693930820406 75120.58345330246 0.7943361635738577 -76035.75349183808] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1201 majorIterations:682] 43311}
+2025/08/24 13:19:25 iter: 0 res: 0.5746873314699577 bestRes 0.5746873314699577
+2025/08/24 13:19:25 WARNING: CPE Y0 7.512e+04 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.794336
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05410563323902447 1.1e-06 0.7943361635738577 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05423994970140016 1.1e-06 0.9970853254373007 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.574940235561627 [0.04930903979001871 9.891571153341026e+09 0.9727138635775507 -4.862897637798673e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:825 majorIterations:493] 10012}
+2025/08/24 13:19:25 iter: 2 res: 0.574940235561627 bestRes 0.5749402355610665
+2025/08/24 13:19:25 WARNING: CPE Y0 9.892e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.972714
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423994376902058 1.1e-06 0.9727138635775507 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395118287748231 1.1e-06 0.950746617667098 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259701578 [0.049046525104826856 2.3464038460280905e+11 0.9382694935622502 -1.5792654835500494e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:815 majorIterations:488] 16799}
+2025/08/24 13:19:25 iter: 1 res: 0.5765974259701578 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 2.346e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.938269
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395117761530955 1.1e-06 0.9382694935622502 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053741128713155104 1.1e-06 0.9868373038929734 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662561769 [0.04885556361118151 1.8431039456138354e+11 0.9909842522908707 -5.25938077059934e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:838 majorIterations:508] 12941}
+2025/08/24 13:19:25 iter: 1 res: 0.5719421662561769 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 1.843e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.990984
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05374111997229967 1.1e-06 0.9909842522908707 110.00000000000001]
+2025/08/24 13:19:25 init: [50 1e-06 0.8 100]
+2025/08/24 13:19:25 resl: {0.5762578308946421 [0.04860543431119297 1.369415719289102e+10 0.9808106206485622 -1.938871217943419e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:1788 majorIterations:1024] 43614}
+2025/08/24 13:19:25 iter: 0 res: 0.5762578308946421 bestRes 0.5762578308946421
+2025/08/24 13:19:25 WARNING: CPE Y0 1.369e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.980811
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05346597774231227 1.1e-06 0.9808106206485622 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341467700064618 1.1e-06 0.9965819471345596 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576284050114695 [0.04855880224201217 1.8272609700296576e+11 0.9633088183232927 -9.706349167042026e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:873 majorIterations:532] 9142}
+2025/08/24 13:19:25 iter: 2 res: 0.576284050114695 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 1.827e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.963309
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341468246621339 1.1e-06 0.9633088183232927 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0538540283497362 1.1e-06 0.8698825169973494 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923264161 [0.04895821068858722 1.4367288446001526e+11 0.9977567101844986 -6.312425006523236e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:903 majorIterations:544] 14114}
+2025/08/24 13:19:25 iter: 1 res: 0.5756672923264161 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 1.437e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.997757
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05385403175744594 1.1e-06 0.9977567101844986 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053845200928222314 1.1e-06 0.8693129231510657 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637714421 [0.04895019462467852 1.0426391559128609e+11 0.9929608297454546 -9.202133401244086e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:830 majorIterations:503] 13277}
+2025/08/24 13:19:25 iter: 1 res: 0.5722585637714421 bestRes 0.5722585637714421
+2025/08/24 13:19:25 WARNING: CPE Y0 1.043e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.992961
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053845214087146376 1.1e-06 0.9929608297454546 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334229104138232 1.1e-06 0.9552790077178193 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836103706 [0.04849299853682798 1.5031651734289294e+11 0.9697420955484951 -1.58699747269392e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:810 majorIterations:493] 12927}
+2025/08/24 13:19:25 iter: 2 res: 0.5761777836103706 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 1.503e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.969742
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229839051078 1.1e-06 0.9697420955484951 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05410563323902447 1.1e-06 0.7943361635738577 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851465984 [0.04918687942307908 1.8262010140889374e+11 0.8512703341218726 -1.3451053083642728e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:822 majorIterations:496] 12877}
+2025/08/24 13:19:25 iter: 1 res: 0.5746870851465984 bestRes 0.5746870851465984
+2025/08/24 13:19:25 WARNING: CPE Y0 1.826e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.851270
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05410556736538699 1.1e-06 0.8512703341218726 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053430206359883624 1.1e-06 0.9496399269349759 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201094827 [0.048572930286515104 5.81430513130123e+11 0.9748697625329275 -4.3272916046013635e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:830 majorIterations:503] 13963}
+2025/08/24 13:19:25 iter: 1 res: 0.5755072201094827 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 5.814e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.974870
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343022331516662 1.1e-06 0.9748697625329275 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05374111997229967 1.1e-06 0.9909842522908707 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662563658 [0.048855567748016276 3.072935851578835e+10 0.996040319701695 -1.1625577159095993e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:806 majorIterations:483] 11325}
+2025/08/24 13:19:25 iter: 2 res: 0.5719421662563658 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 3.073e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.996040
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05374112452281791 1.1e-06 0.996040319701695 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05346597774231227 1.1e-06 0.9808106206485622 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308940796 [0.048605445600789346 9.58128219799281e+11 0.9953879302661144 -2.5429972162106927e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:859 majorIterations:537] 12127}
+2025/08/24 13:19:25 iter: 1 res: 0.5762578308940796 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 9.581e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995388
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05346599016086828 1.1e-06 0.9953879302661144 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395117761530955 1.1e-06 0.9382694935622502 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259701617 [0.04904653167416272 1.6165135139364706e+11 0.9782122817812925 -1.0431147112321324e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:874 majorIterations:526] 13433}
+2025/08/24 13:19:25 iter: 2 res: 0.5765974259701617 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 1.617e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.978212
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053951184841579 1.1e-06 0.9782122817812925 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0530111648560818 1.1e-06 0.9684862595809317 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219857992 [0.048191969373523484 1.945666315520169e+11 0.9766572098973698 1.580010299533345e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:842 majorIterations:516] 18180}
+2025/08/24 13:19:25 iter: 3 res: 0.5769975219857992 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 1.946e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.976657
+2025/08/24 13:19:25 WARNING: Resistance 1.580e+10 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05301116631087584 1.1e-06 0.9766572098973698 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05423994376902058 1.1e-06 0.9727138635775507 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355612466 [0.04930904543428946 1.942135990645983e+10 0.9715562135084593 5.122563677465069e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:836 majorIterations:509] 15696}
+2025/08/24 13:19:25 iter: 3 res: 0.5749402355612466 bestRes 0.5749402355610665
+2025/08/24 13:19:25 WARNING: CPE Y0 1.942e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.971556
+2025/08/24 13:19:25 WARNING: Resistance 5.123e+08 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423994997771841 1.1e-06 0.9715562135084593 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05367986395360209 1.1e-06 0.9756662520261048 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.575625861164167 [0.048799892929737215 4.0233213247914566e+10 0.915441290223755 9.386025254791073e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:746 majorIterations:457] 17477}
+2025/08/24 13:19:25 iter: 3 res: 0.575625861164167 bestRes 0.5756258611640228
+2025/08/24 13:19:25 WARNING: CPE Y0 4.023e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.915441
+2025/08/24 13:19:25 WARNING: Resistance 9.386e+08 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367988222271094 1.1e-06 0.915441290223755 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341468246621339 1.1e-06 0.9633088183232927 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501148383 [0.04855879113407996 5.4702098951387e+10 0.9436707103757203 6.964182794935464e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:820 majorIterations:495] 16238}
+2025/08/24 13:19:25 iter: 3 res: 0.5762840501148383 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 5.470e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.943671
+2025/08/24 13:19:25 WARNING: Resistance 6.964e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341467024748796 1.1e-06 0.9436707103757203 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05385403175744594 1.1e-06 0.9977567101844986 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923273359 [0.04895822271953169 1.1336550038117302e+10 0.9106193981420118 -5.986791928795012e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:975 majorIterations:582] 12448}
+2025/08/24 13:19:25 iter: 2 res: 0.5756672923273359 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 1.134e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.910619
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05385404499148486 1.1e-06 0.9106193981420118 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053845214087146376 1.1e-06 0.9929608297454546 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637745782 [0.04895022455113531 2.964693371549919e+09 0.9469035086048082 -1.6740443402397141e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:742 majorIterations:463] 13805}
+2025/08/24 13:19:25 iter: 2 res: 0.5722585637745782 bestRes 0.5722585637714421
+2025/08/24 13:19:25 WARNING: CPE Y0 2.965e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.946904
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05384524700624885 1.1e-06 0.9469035086048082 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334229839051078 1.1e-06 0.9697420955484951 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836104129 [0.04849299797374606 7.455279859081827e+10 0.9896172317439885 1.7530607844421077e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:786 majorIterations:479] 10535}
+2025/08/24 13:19:25 iter: 3 res: 0.5761777836104129 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 7.455e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.989617
+2025/08/24 13:19:25 WARNING: Resistance 1.753e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229777112067 1.1e-06 0.9896172317439885 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343022331516662 1.1e-06 0.9748697625329275 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201095698 [0.04857292831041275 8.631032671927238e+10 0.954594055928541 2.194295885335467e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:743 majorIterations:450] 11543}
+2025/08/24 13:19:25 iter: 2 res: 0.5755072201095698 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 8.631e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.954594
+2025/08/24 13:19:25 WARNING: Resistance 2.194e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343022114145403 1.1e-06 0.954594055928541 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05423994997771841 1.1e-06 0.9715562135084593 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355611096 [0.049309049153050635 3.467472317498521e+10 0.9437115971843739 -2.8230376140469915e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:754 majorIterations:463] 10090}
+2025/08/24 13:19:25 iter: 4 res: 0.5749402355611096 bestRes 0.5749402355610665
+2025/08/24 13:19:25 WARNING: CPE Y0 3.467e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.943712
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0542399540683557 1.1e-06 0.9437115971843739 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05410556736538699 1.1e-06 0.8512703341218726 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851467188 [0.04918688127292269 8.184454198028333e+10 0.8224200598658763 -9.895123613998003e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:825 majorIterations:504] 14301}
+2025/08/24 13:19:25 iter: 2 res: 0.5746870851467188 bestRes 0.5746870851465984
+2025/08/24 13:19:25 WARNING: CPE Y0 8.184e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.822420
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054105569400214965 1.1e-06 0.8224200598658763 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05301116631087584 1.1e-06 0.9766572098973698 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219859458 [0.048191981368486604 4.210709324093343e+10 0.9861124731837376 1.1024766639763117e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:809 majorIterations:502] 12225}
+2025/08/24 13:19:25 iter: 4 res: 0.5769975219859458 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 4.211e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.986112
+2025/08/24 13:19:25 WARNING: Resistance 1.102e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05301117950533527 1.1e-06 0.9861124731837376 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053951184841579 1.1e-06 0.9782122817812925 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259702438 [0.049046530860368295 5.481873634536543e+10 0.9901615303543709 -1.7098746094618307e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:822 majorIterations:499] 14466}
+2025/08/24 13:19:25 iter: 3 res: 0.5765974259702438 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 5.482e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.990162
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395118394640513 1.1e-06 0.9901615303543709 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05367988222271094 1.1e-06 0.915441290223755 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611639459 [0.04879988346654561 1.3556770276318408e+11 0.9498013526544424 -1.2511137289717906e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:744 majorIterations:451] 12494}
+2025/08/24 13:19:25 iter: 4 res: 0.5756258611639459 bestRes 0.5756258611639459
+2025/08/24 13:19:25 WARNING: CPE Y0 1.356e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.949801
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367987181320018 1.1e-06 0.9498013526544424 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05374112452281791 1.1e-06 0.996040319701695 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662566097 [0.04885555746753488 1.7250397208921574e+10 0.9723445626498168 -9.175841186372091e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:794 majorIterations:482] 17722}
+2025/08/24 13:19:25 iter: 3 res: 0.5719421662566097 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 1.725e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.972345
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05374111321428837 1.1e-06 0.9723445626498168 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05385404499148486 1.1e-06 0.9106193981420118 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923267738 [0.0489581974952519 1.9014746860448624e+10 0.9846848256978589 -1.4541946876865871e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:814 majorIterations:498] 11774}
+2025/08/24 13:19:25 iter: 3 res: 0.5756672923267738 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 1.901e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.984685
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05385401724477709 1.1e-06 0.9846848256978589 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343022114145403 1.1e-06 0.954594055928541 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201095225 [0.048572935640563156 1.5769909885202173e+11 0.9705817118330873 -1.6444501197491364e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:786 majorIterations:479] 11425}
+2025/08/24 13:19:25 iter: 3 res: 0.5755072201095225 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 1.577e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.970582
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343022920461948 1.1e-06 0.9705817118330873 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341467024748796 1.1e-06 0.9436707103757203 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501150183 [0.048558800110185485 3.2995395489418545e+10 0.8843115169431439 -2.302849612279953e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:820 majorIterations:504] 16326}
+2025/08/24 13:19:25 iter: 4 res: 0.5762840501150183 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 3.300e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.884312
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341468012120404 1.1e-06 0.8843115169431439 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05346599016086828 1.1e-06 0.9953879302661144 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576257830894103 [0.04860544401819851 2.2799511875638956e+11 0.9956559312146 -1.2106008180478398e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:847 majorIterations:513] 23175}
+2025/08/24 13:19:25 iter: 2 res: 0.576257830894103 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 2.280e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995656
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053465988420018366 1.1e-06 0.9956559312146 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334229777112067 1.1e-06 0.9896172317439885 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836105675 [0.04849299439696503 2.6553200270488056e+10 0.9997415800402867 -1.4929961934089716e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:712 majorIterations:431] 13905}
+2025/08/24 13:19:25 iter: 4 res: 0.5761777836105675 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 2.655e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.999742
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229383666154 1.1e-06 0.9997415800402867 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05384524700624885 1.1e-06 0.9469035086048082 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637714673 [0.0489501932098742 8.337065254687021e+10 0.9708454833909741 -6.601035953660315e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:841 majorIterations:499] 15942}
+2025/08/24 13:19:25 iter: 3 res: 0.5722585637714673 bestRes 0.5722585637714421
+2025/08/24 13:19:25 WARNING: CPE Y0 8.337e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.970845
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05384521253086162 1.1e-06 0.9708454833909741 110.00000000000001]
+2025/08/24 13:19:25 init: [0.054105569400214965 1.1e-06 0.8224200598658763 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851474418 [0.049186868982750716 7.609616389837364e+09 0.9967164330836135 -9.32438043757055e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:807 majorIterations:497] 12260}
+2025/08/24 13:19:25 iter: 3 res: 0.5746870851474418 bestRes 0.5746870851465984
+2025/08/24 13:19:25 WARNING: CPE Y0 7.610e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.996716
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054105555881025794 1.1e-06 0.9967164330836135 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05301117950533527 1.1e-06 0.9861124731837376 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219858475 [0.048191971500355035 9.143966711406522e+10 0.9640771115940396 -5.094349535428871e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:813 majorIterations:492] 11686}
+2025/08/24 13:19:25 iter: 5 res: 0.5769975219858475 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 9.144e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.964077
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053011168650390544 1.1e-06 0.9640771115940396 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395118394640513 1.1e-06 0.9901615303543709 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259702262 [0.049046526007278685 6.457042831656336e+10 0.9912562360736406 -3.844252474129972e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:756 majorIterations:458] 10964}
+2025/08/24 13:19:25 iter: 4 res: 0.5765974259702262 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 6.457e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.991256
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395117860800656 1.1e-06 0.9912562360736406 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05374111321428837 1.1e-06 0.9723445626498168 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662569197 [0.04885557425372627 9.880222469552927e+09 0.9798668484186804 9.200538088041893e+07] OK false 0 0 r(qr) ChiSq map[funcEvaluations:830 majorIterations:501] 9614}
+2025/08/24 13:19:25 iter: 4 res: 0.5719421662569197 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 9.880e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.979867
+2025/08/24 13:19:25 WARNING: Resistance 9.201e+07 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0537411316790989 1.1e-06 0.9798668484186804 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05367987181320018 1.1e-06 0.9498013526544424 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0542399540683557 1.1e-06 0.9437115971843739 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355611088 [0.04930904748403653 2.6126204308421585e+10 0.9991954970866901 -1.9215242849447212e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:842 majorIterations:512] 15342}
+2025/08/24 13:19:25 iter: 5 res: 0.5749402355611088 bestRes 0.5749402355610665
+2025/08/24 13:19:25 WARNING: CPE Y0 2.613e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.999195
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054239952232440186 1.1e-06 0.9991954970866901 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611648328 [0.048799874564214786 7.562495845199501e+09 0.9883109395798879 -4.979054169176464e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:831 majorIterations:507] 11578}
+2025/08/24 13:19:25 iter: 5 res: 0.5756258611648328 bestRes 0.5756258611639459
+2025/08/24 13:19:25 WARNING: CPE Y0 7.562e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.988311
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367986202063627 1.1e-06 0.9883109395798879 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341468012120404 1.1e-06 0.8843115169431439 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501154464 [0.04855878257230553 9.61336195471037e+09 0.9958367125560639 -1.1454219070045544e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:839 majorIterations:509] 8871}
+2025/08/24 13:19:25 iter: 5 res: 0.5762840501154464 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 9.613e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995837
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341466082953609 1.1e-06 0.9958367125560639 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05385401724477709 1.1e-06 0.9846848256978589 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923270088 [0.0489582117897899 1.3666775103659306e+10 0.9490857626102736 -4.143126656721963e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:777 majorIterations:471] 15203}
+2025/08/24 13:19:25 iter: 4 res: 0.5756672923270088 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 1.367e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.949086
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053854032968768895 1.1e-06 0.9490857626102736 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053465988420018366 1.1e-06 0.9956559312146 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576257830894247 [0.04860544626805103 4.427085237217615e+10 0.9743167960427245 -2.3505602270073914e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:765 majorIterations:463] 11717}
+2025/08/24 13:19:25 iter: 3 res: 0.576257830894247 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 4.427e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.974317
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05346599089485614 1.1e-06 0.9743167960427245 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343022920461948 1.1e-06 0.9705817118330873 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201094846 [0.048572933858143534 5.583040247053895e+11 0.9675105113677029 2.011892977303739e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:817 majorIterations:495] 14497}
+2025/08/24 13:19:25 iter: 4 res: 0.5755072201094846 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 5.583e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.967511
+2025/08/24 13:19:25 WARNING: Resistance 2.012e+10 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343022724395789 1.1e-06 0.9675105113677029 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053011168650390544 1.1e-06 0.9640771115940396 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219860295 [0.04819197114402282 2.699835687436208e+10 0.9859038094875363 3.0492970684838057e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:817 majorIterations:499] 11407}
+2025/08/24 13:19:25 iter: 6 res: 0.5769975219860295 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 2.700e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.985904
+2025/08/24 13:19:25 WARNING: Resistance 3.049e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053011168258425105 1.1e-06 0.9859038094875363 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05384521253086162 1.1e-06 0.9708454833909741 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637713954 [0.04895018936758668 6.03690602052626e+11 0.8530859769912342 -3.7724630792056594e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:780 majorIterations:477] 14001}
+2025/08/24 13:19:25 iter: 4 res: 0.5722585637713954 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 6.037e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.853086
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05384520830434535 1.1e-06 0.8530859769912342 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0537411316790989 1.1e-06 0.9798668484186804 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662569488 [0.048855583537202034 1.2098993137798065e+10 0.9419076480576319 -3.369780341328e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:814 majorIterations:501] 12728}
+2025/08/24 13:19:25 iter: 5 res: 0.5719421662569488 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 1.210e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.941908
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053741141890922245 1.1e-06 0.9419076480576319 110.00000000000001]
+2025/08/24 13:19:25 init: [0.054105555881025794 1.1e-06 0.9967164330836135 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851467123 [0.049186886101215424 4.775406655186081e+10 0.9447543685345661 -2.3401414572372696e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:882 majorIterations:537] 14856}
+2025/08/24 13:19:25 iter: 4 res: 0.5746870851467123 bestRes 0.5746870851465984
+2025/08/24 13:19:25 WARNING: CPE Y0 4.775e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.944754
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05410557471133697 1.1e-06 0.9447543685345661 110.00000000000001]
+2025/08/24 13:19:25 init: [0.054239952232440186 1.1e-06 0.9991954970866901 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355609103 [0.04930904387082516 1.913687593191972e+11 0.8843624184620722 -9.393891797344904e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:813 majorIterations:496] 13351}
+2025/08/24 13:19:25 iter: 6 res: 0.5749402355609103 bestRes 0.5749402355609103
+2025/08/24 13:19:25 WARNING: CPE Y0 1.914e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.884362
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423994825790768 1.1e-06 0.8843624184620722 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334229383666154 1.1e-06 0.9997415800402867 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836103955 [0.048492997116702394 8.506496749493399e+10 0.9983045186571335 -2.436777030625538e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:830 majorIterations:509] 17000}
+2025/08/24 13:19:25 iter: 5 res: 0.5761777836103955 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 8.506e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.998305
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229682837264 1.1e-06 0.9983045186571335 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395117860800656 1.1e-06 0.9912562360736406 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259703147 [0.04904653839291255 4.366596676693655e+10 0.9605669859414065 -2.3827354445671597e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:713 majorIterations:439] 14605}
+2025/08/24 13:19:25 iter: 5 res: 0.5765974259703147 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 4.367e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.960567
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395119223220381 1.1e-06 0.9605669859414065 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053854032968768895 1.1e-06 0.9490857626102736 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923265823 [0.04895821697171995 4.5807096376161354e+10 0.9374015543574641 -5.036065194226863e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:826 majorIterations:504] 13761}
+2025/08/24 13:19:25 iter: 5 res: 0.5756672923265823 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 4.581e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.937402
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053854038668891956 1.1e-06 0.9374015543574641 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05367986202063627 1.1e-06 0.9883109395798879 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611640105 [0.04879987912322649 5.400151752044403e+10 0.9903726976491846 -2.8921052941135666e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:770 majorIterations:470] 20701}
+2025/08/24 13:19:25 iter: 6 res: 0.5756258611640105 bestRes 0.5756258611639459
+2025/08/24 13:19:25 WARNING: CPE Y0 5.400e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.990373
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367986703554914 1.1e-06 0.9903726976491846 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053011168258425105 1.1e-06 0.9859038094875363 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5769975219861094 [0.04819197614518224 2.0159911679348045e+10 0.993758871078513 -1.1231628311046478e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:827 majorIterations:502] 11899}
+2025/08/24 13:19:25 iter: 7 res: 0.5769975219861094 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 2.016e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.993759
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053011173759700464 1.1e-06 0.993758871078513 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05346599089485614 1.1e-06 0.9743167960427245 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308941333 [0.04860544996421766 1.9520969150437296e+11 0.8986888247275369 5.090591672413473e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:773 majorIterations:472] 14184}
+2025/08/24 13:19:25 iter: 4 res: 0.5762578308941333 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 1.952e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.898689
+2025/08/24 13:19:25 WARNING: Resistance 5.091e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05346599496063943 1.1e-06 0.8986888247275369 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341466082953609 1.1e-06 0.9958367125560639 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501151902 [0.04855880970107865 1.4810866806106674e+10 0.9716146832851664 -7.862103213205471e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:789 majorIterations:483] 17657}
+2025/08/24 13:19:25 iter: 6 res: 0.5762840501151902 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 1.481e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.971615
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05341469067118652 1.1e-06 0.9716146832851664 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343022724395789 1.1e-06 0.9675105113677029 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201096908 [0.04857292542788897 3.18659388300961e+10 0.9985553369018585 1.8461393426634307e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:748 majorIterations:455] 14678}
+2025/08/24 13:19:25 iter: 5 res: 0.5755072201096908 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 3.187e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.998555
+2025/08/24 13:19:25 WARNING: Resistance 1.846e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053430217970677873 1.1e-06 0.9985553369018585 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053741141890922245 1.1e-06 0.9419076480576319 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.571942166256216 [0.048855568049146425 9.270444714585551e+10 0.9876129351611975 -6.898457218137767e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:778 majorIterations:473] 12844}
+2025/08/24 13:19:25 iter: 6 res: 0.571942166256216 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 9.270e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.987613
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05374112485406107 1.1e-06 0.9876129351611975 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05423994825790768 1.1e-06 0.8843624184620722 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355608938 [0.04930904209868428 1.5033488646907257e+11 0.9977036104743868 -1.8259955665642175e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:820 majorIterations:500] 11130}
+2025/08/24 13:19:25 iter: 7 res: 0.5749402355608938 bestRes 0.5749402355608938
+2025/08/24 13:19:25 WARNING: CPE Y0 1.503e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.997704
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054239946308552715 1.1e-06 0.9977036104743868 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395119223220381 1.1e-06 0.9605669859414065 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259705348 [0.049046541364686745 1.825752295558972e+10 0.9848173784552812 -7.745494710478458e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:746 majorIterations:460] 10530}
+2025/08/24 13:19:25 iter: 6 res: 0.5765974259705348 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 1.826e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.984817
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395119550115542 1.1e-06 0.9848173784552812 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05334229682837264 1.1e-06 0.9983045186571335 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836105678 [0.04849300747695276 3.673215268407308e+10 0.9746759115887207 -1.9409775852951706e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:799 majorIterations:483] 11678}
+2025/08/24 13:19:25 iter: 6 res: 0.5761777836105678 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 3.673e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.974676
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334230822464804 1.1e-06 0.9746759115887207 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05384520830434535 1.1e-06 0.8530859769912342 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.572258563771454 [0.048950183930504376 9.396304566316049e+10 0.9978679682847171 -1.0984389098036841e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:887 majorIterations:538] 16958}
+2025/08/24 13:19:25 iter: 5 res: 0.572258563771454 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 9.396e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.997868
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05384520232355482 1.1e-06 0.9978679682847171 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053854038668891956 1.1e-06 0.9374015543574641 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923267556 [0.04895820385218956 1.9419646485674103e+10 0.9808216348077747 -1.2588662808018858e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:823 majorIterations:498] 11030}
+2025/08/24 13:19:25 iter: 6 res: 0.5756672923267556 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 1.942e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.980822
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053854024237408524 1.1e-06 0.9808216348077747 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05346599496063943 1.1e-06 0.8986888247275369 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308943517 [0.048605444812021344 2.818961932936427e+10 0.9707396471859322 -7.959996330419272e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:890 majorIterations:536] 11534}
+2025/08/24 13:19:25 iter: 5 res: 0.5762578308943517 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 2.819e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.970740
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053465989293223486 1.1e-06 0.9707396471859322 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053430217970677873 1.1e-06 0.9985553369018585 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201095527 [0.048572927092687956 1.1213981429534808e+11 0.9446840697688039 -5.50380811200519e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:759 majorIterations:467] 10494}
+2025/08/24 13:19:25 iter: 6 res: 0.5755072201095527 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 1.121e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.944684
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343021980195676 1.1e-06 0.9446840697688039 110.00000000000001]
+2025/08/24 13:19:25 init: [0.054239946308552715 1.1e-06 0.9977036104743868 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355609713 [0.04930903951047372 5.6179327844909e+10 0.9988098496774989 -2.740644803945575e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:761 majorIterations:470] 9838}
+2025/08/24 13:19:25 iter: 8 res: 0.5749402355609713 bestRes 0.5749402355608938
+2025/08/24 13:19:25 WARNING: CPE Y0 5.618e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.998810
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05423994346152109 1.1e-06 0.9988098496774989 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05374112485406107 1.1e-06 0.9876129351611975 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662566468 [0.04885558019025988 1.807989522995336e+10 0.9552142162247858 -4.954259192462141e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:751 majorIterations:461] 10774}
+2025/08/24 13:19:25 iter: 7 res: 0.5719421662566468 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 1.808e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.955214
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053741138209285874 1.1e-06 0.9552142162247858 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053011173759700464 1.1e-06 0.993758871078513 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576997521986013 [0.04819196867790905 2.8933571177717266e+10 0.986481852640111 -1.5358338102628983e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:770 majorIterations:474] 12193}
+2025/08/24 13:19:25 iter: 8 res: 0.576997521986013 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 2.893e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.986482
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053011165545699956 1.1e-06 0.986481852640111 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05410557471133697 1.1e-06 0.9447543685345661 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851465304 [0.0491868787897064 1.146071976144962e+12 0.9273045858431356 6.00163672704717e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:845 majorIterations:509] 22539}
+2025/08/24 13:19:25 iter: 5 res: 0.5746870851465304 bestRes 0.5746870851465304
+2025/08/24 13:19:25 WARNING: CPE Y0 1.146e+12 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.927305
+2025/08/24 13:19:25 WARNING: Resistance 6.002e+11 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054105566668677045 1.1e-06 0.9273045858431356 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05367986703554914 1.1e-06 0.9903726976491846 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611644146 [0.04879987391733781 2.135117512491381e+10 0.8964226950072944 -1.1388282456038876e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:756 majorIterations:456] 15400}
+2025/08/24 13:19:25 iter: 7 res: 0.5756258611644146 bestRes 0.5756258611639459
+2025/08/24 13:19:25 WARNING: CPE Y0 2.135e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.896423
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0536798613090716 1.1e-06 0.8964226950072944 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05384520232355482 1.1e-06 0.9978679682847171 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637715204 [0.048950183940160444 7.492338203304099e+10 0.9133634187844942 -3.95712739009144e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:779 majorIterations:479] 9392}
+2025/08/24 13:19:25 iter: 6 res: 0.5722585637715204 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 7.492e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.913363
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053845202334176494 1.1e-06 0.9133634187844942 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395119550115542 1.1e-06 0.9848173784552812 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259705495 [0.04904651785585075 2.3316259123204475e+10 0.9294890779205487 -6.977266335715544e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:761 majorIterations:451] 15568}
+2025/08/24 13:19:25 iter: 7 res: 0.5765974259705495 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 2.332e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.929489
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395116964143583 1.1e-06 0.9294890779205487 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05341469067118652 1.1e-06 0.9716146832851664 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501148253 [0.0485587964472948 4.572312132263942e+10 0.9756299776616939 1.1096855134997869e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:797 majorIterations:486] 18567}
+2025/08/24 13:19:25 iter: 7 res: 0.5762840501148253 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 4.572e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.975630
+2025/08/24 13:19:25 WARNING: Resistance 1.110e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053414676092024285 1.1e-06 0.9756299776616939 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053854024237408524 1.1e-06 0.9808216348077747 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923265781 [0.04895821395378211 6.839816010055861e+10 0.8533077493674897 -1.881960200322406e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:811 majorIterations:493] 12954}
+2025/08/24 13:19:25 iter: 7 res: 0.5756672923265781 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 6.840e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.853308
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05385403534916033 1.1e-06 0.8533077493674897 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053465989293223486 1.1e-06 0.9707396471859322 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308941056 [0.048605449711991225 2.5790792525870767e+11 0.9722892320533462 9.258361216892818e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:869 majorIterations:536] 11430}
+2025/08/24 13:19:25 iter: 6 res: 0.5762578308941056 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 2.579e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.972289
+2025/08/24 13:19:25 WARNING: Resistance 9.258e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053465994683190354 1.1e-06 0.9722892320533462 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053011165545699956 1.1e-06 0.986481852640111 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576997521985808 [0.04819197334129645 1.5465936044010492e+11 0.9757441534488525 -8.616463199179614e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:809 majorIterations:488] 10381}
+2025/08/24 13:19:25 iter: 9 res: 0.576997521985808 bestRes 0.5769975219857992
+2025/08/24 13:19:25 WARNING: CPE Y0 1.547e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.975744
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 469817.2883604219 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (469817.2883604219) instead of original (0.5769975219857992)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.69817288360422e+05
+2025/08/24 13:19:25 Processing time: 131.44ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:469817.2883604219 Params:[29.471027798868317 1.9786307874950533e-09 0.9766572098973698 61153.400000000016] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:842 majorIterations:516] Runtime:18180}
+2025/08/24 13:19:25 init: [0.05423994346152109 1.1e-06 0.9988098496774989 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5749402355610185 [0.04930904456084088 4.000807000784872e+10 0.9972216006309245 -1.9639055312364094e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:853 majorIterations:518] 10669}
+2025/08/24 13:19:25 iter: 9 res: 0.5749402355610185 bestRes 0.5749402355608938
+2025/08/24 13:19:25 WARNING: CPE Y0 4.001e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.997222
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 392528.1210395749 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (392528.1210395749) instead of original (0.5749402355608938)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 3.92528121039575e+05
+2025/08/24 13:19:25 Processing time: 131.695583ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:392528.1210395749 Params:[29.378524518564493 2.0308692120227457e-09 0.9977036104743868 59580.40000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:820 majorIterations:500] Runtime:11130}
+2025/08/24 13:19:25 init: [0.05334230822464804 1.1e-06 0.9746759115887207 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836105616 [0.048492985021461724 2.8277559483585094e+10 0.9951396049870112 7.720773787477922e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:734 majorIterations:455] 18502}
+2025/08/24 13:19:25 iter: 7 res: 0.5761777836105616 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 2.828e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995140
+2025/08/24 13:19:25 WARNING: Resistance 7.721e+08 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0533422835236079 1.1e-06 0.9951396049870112 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343021980195676 1.1e-06 0.9446840697688039 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201095186 [0.04857292905133046 1.4343274611047794e+11 0.9964858417389446 -1.4808224664830542e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:917 majorIterations:556] 12394}
+2025/08/24 13:19:25 iter: 7 res: 0.5755072201095186 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 1.434e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.996486
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343022195646351 1.1e-06 0.9964858417389446 110.00000000000001]
+2025/08/24 13:19:25 Processing webhook for 2016c72d64e5a930_iter_008
+2025/08/24 13:19:25 Processing webhook for 1ecfcfe38d95f7e9_iter_003
+2025/08/24 13:19:25 init: [0.053741138209285874 1.1e-06 0.9552142162247858 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662562648 [0.04885556186226909 6.509751688504982e+10 0.9669208812293539 -6.3571633512268585e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:843 majorIterations:514] 12284}
+2025/08/24 13:19:25 iter: 8 res: 0.5719421662562648 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 6.510e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.966921
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053741118048496 1.1e-06 0.9669208812293539 110.00000000000001]
+2025/08/24 13:19:25 init: [0.054105566668677045 1.1e-06 0.9273045858431356 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851468179 [0.04918689203203254 2.628025195102338e+10 0.9872872529245911 -9.654392895014013e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:825 majorIterations:501] 15345}
+2025/08/24 13:19:25 iter: 6 res: 0.5746870851468179 bestRes 0.5746870851465304
+2025/08/24 13:19:25 WARNING: CPE Y0 2.628e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.987287
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054105581235235796 1.1e-06 0.9872872529245911 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0536798613090716 1.1e-06 0.8964226950072944 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.575625861163901 [0.04879987976296511 3.582580612251154e+11 0.9675348937702055 -1.0460901943783507e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:862 majorIterations:517] 14983}
+2025/08/24 13:19:25 iter: 8 res: 0.575625861163901 bestRes 0.575625861163901
+2025/08/24 13:19:25 WARNING: CPE Y0 3.583e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.967535
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05367986773926163 1.1e-06 0.9675348937702055 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053845202334176494 1.1e-06 0.9133634187844942 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637714072 [0.048950185576340004 2.4821475240987537e+11 0.98068759368289 -1.4644960336658344e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:859 majorIterations:521] 14823}
+2025/08/24 13:19:25 iter: 7 res: 0.5722585637714072 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 2.482e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.980688
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053845204133974006 1.1e-06 0.98068759368289 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053414676092024285 1.1e-06 0.9756299776616939 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501147369 [0.04855879985205938 1.0145414632464473e+11 0.9520001411577652 2.1461984829480648e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:847 majorIterations:517] 13345}
+2025/08/24 13:19:25 iter: 8 res: 0.5762840501147369 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 1.015e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.952000
+2025/08/24 13:19:25 WARNING: Resistance 2.146e+09 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053414679837265326 1.1e-06 0.9520001411577652 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053465994683190354 1.1e-06 0.9722892320533462 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308943962 [0.04860543984213528 2.193763683205903e+10 0.9950027626095749 8.029831343800446e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:772 majorIterations:482] 10393}
+2025/08/24 13:19:25 iter: 7 res: 0.5762578308943962 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 2.194e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.995003
+2025/08/24 13:19:25 WARNING: Resistance 8.030e+08 is extremely high, clamping
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05346598382634881 1.1e-06 0.9950027626095749 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05385403534916033 1.1e-06 0.8533077493674897 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923265488 [0.04895820893402408 6.158055381322902e+10 0.8996942279468916 -7.234854335412398e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:805 majorIterations:486] 12617}
+2025/08/24 13:19:25 iter: 8 res: 0.5756672923265488 bestRes 0.5756672923264161
+2025/08/24 13:19:25 WARNING: CPE Y0 6.158e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.899694
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05385402982742649 1.1e-06 0.8996942279468916 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05395116964143583 1.1e-06 0.9294890779205487 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259702924 [0.04904652767100276 4.0653671867863266e+10 0.9866742395324783 -3.3671666610592216e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:853 majorIterations:515] 15518}
+2025/08/24 13:19:25 iter: 8 res: 0.5765974259702924 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 4.065e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.986674
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05395118043810304 1.1e-06 0.9866742395324783 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0533422835236079 1.1e-06 0.9951396049870112 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5761777836106684 [0.04849299948764526 2.036614187878866e+10 0.9929375296208804 -1.074431297481774e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:797 majorIterations:491] 11820}
+2025/08/24 13:19:25 iter: 8 res: 0.5761777836106684 bestRes 0.5761777836103706
+2025/08/24 13:19:25 WARNING: CPE Y0 2.037e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.992938
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05334229943640979 1.1e-06 0.9929375296208804 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05343022195646351 1.1e-06 0.9964858417389446 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.575507220110346 [0.048572918225868414 9.263975709311327e+09 0.9716492316596933 -4.919098961144809e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:758 majorIterations:458] 12191}
+2025/08/24 13:19:25 iter: 8 res: 0.575507220110346 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 9.264e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.971649
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05343021004845526 1.1e-06 0.9716492316596933 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053741118048496 1.1e-06 0.9669208812293539 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5719421662562392 [0.04885556470243942 8.835904228545403e+10 0.9452629415458778 -8.207398176928305e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:864 majorIterations:524] 11831}
+2025/08/24 13:19:25 iter: 9 res: 0.5719421662562392 bestRes 0.5719421662561769
+2025/08/24 13:19:25 WARNING: CPE Y0 8.836e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.945263
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 419860.2699055399 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (419860.2699055399) instead of original (0.5719421662561769)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.19860269905540e+05
+2025/08/24 13:19:25 Processing time: 145.594583ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:419860.2699055399 Params:[30.181012976443494 1.9586894586894585e-09 0.9909842522908707 61776.00000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:838 majorIterations:508] Runtime:12941}
+2025/08/24 13:19:25 Processing webhook for c9418c85b7fa51c2_iter_001
+2025/08/24 13:19:25 init: [0.05367986773926163 1.1e-06 0.9675348937702055 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756258611640495 [0.04879988126591307 4.0852385119848236e+10 0.9949596820825977 2.336276694806365e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:782 majorIterations:481] 9881}
+2025/08/24 13:19:25 iter: 9 res: 0.5756258611640495 bestRes 0.575625861163901
+2025/08/24 13:19:25 WARNING: CPE Y0 4.085e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.994960
+2025/08/24 13:19:25 WARNING: Resistance 2.336e+09 is extremely high, clamping
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 488552.21435574326 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (488552.21435574326) instead of original (0.575625861163901)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.88552214355743e+05
+2025/08/24 13:19:25 Processing time: 147.068458ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:488552.21435574326 Params:[29.431061085404973 2.0063107592974266e-09 0.9675348937702055 60309.700000000004] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:862 majorIterations:517] Runtime:14983}
+2025/08/24 13:19:25 Processing webhook for 9524aa625941bdf9_iter_005
+2025/08/24 13:19:25 init: [0.054105581235235796 1.1e-06 0.9872872529245911 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851467432 [0.04918687331908632 3.46473147243729e+10 0.981127720540782 -2.0581902506809692e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:786 majorIterations:492] 10902}
+2025/08/24 13:19:25 iter: 7 res: 0.5746870851467432 bestRes 0.5746870851465304
+2025/08/24 13:19:25 WARNING: CPE Y0 3.465e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.981128
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.054105560650994956 1.1e-06 0.981127720540782 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053845204133974006 1.1e-06 0.98068759368289 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637716862 [0.048950179778156834 2.6208564991270924e+10 0.9777073874139737 -7.049984683197022e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:798 majorIterations:487] 10238}
+2025/08/24 13:19:25 iter: 8 res: 0.5722585637716862 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 2.621e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.977707
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.053845197755972525 1.1e-06 0.9777073874139737 110.00000000000001]
+2025/08/24 13:19:25 init: [0.05346598382634881 1.1e-06 0.9950027626095749 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576257830894148 [0.04860544839731791 1.2505781067364166e+11 0.9374471262015924 -6.605840150933675e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:779 majorIterations:484] 8534}
+2025/08/24 13:19:25 iter: 8 res: 0.576257830894148 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 1.251e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.937447
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.0534659932370497 1.1e-06 0.9374471262015924 110.00000000000001]
+2025/08/24 13:19:25 init: [0.053414679837265326 1.1e-06 0.9520001411577652 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762840501147005 [0.04855880125378545 1.4052336276795578e+11 0.9936476336712979 -1.0693560468132295e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:791 majorIterations:484] 9489}
+2025/08/24 13:19:25 iter: 9 res: 0.5762840501147005 bestRes 0.576284050114695
+2025/08/24 13:19:25 WARNING: CPE Y0 1.405e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.993648
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 507955.7595839147 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (507955.7595839147) instead of original (0.576284050114695)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 5.07955759583915e+05
+2025/08/24 13:19:25 Processing time: 150.327042ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:507955.7595839147 Params:[29.346026546937637 2.0021842009464873e-09 0.9633088183232927 60434.00000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:873 majorIterations:532] Runtime:9142}
+2025/08/24 13:19:25 Processing webhook for fac62c7afa67c729_iter_006
+2025/08/24 13:19:25 init: [0.05395118043810304 1.1e-06 0.9866742395324783 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5765974259704006 [0.04904652370170878 2.42295754623896e+10 0.9987709536890248 -6.932020197601644e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:760 majorIterations:468] 9185}
+2025/08/24 13:19:25 iter: 9 res: 0.5765974259704006 bestRes 0.5765974259701578
+2025/08/24 13:19:25 WARNING: CPE Y0 2.423e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.998771
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 582833.0925558865 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (582833.0925558865) instead of original (0.5765974259701578)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 5.82833092555886e+05
+2025/08/24 13:19:25 Processing time: 151.278ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:582833.0925558865 Params:[29.286317744918485 2.0264171103292008e-09 0.9382694935622502 59711.30000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:815 majorIterations:488] Runtime:16799}
+2025/08/24 13:19:25 Processing webhook for c9a153b79b3338ca_iter_010
+2025/08/24 13:19:25 init: [0.05385402982742649 1.1e-06 0.8996942279468916 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5756672923263997 [0.04895821312743038 2.7216116074253467e+11 0.974916835658093 5.733990446164226e+11] OK false 0 0 r(qr) ChiSq map[funcEvaluations:871 majorIterations:517] 10568}
+2025/08/24 13:19:25 iter: 9 res: 0.5756672923263997 bestRes 0.5756672923263997
+2025/08/24 13:19:25 WARNING: CPE Y0 2.722e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.974917
+2025/08/24 13:19:25 WARNING: Resistance 5.734e+11 is extremely high, clamping
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 464034.82496336015 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (464034.82496336015) instead of original (0.5756672923263997)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.64034824963360e+05
+2025/08/24 13:19:25 Processing time: 153.161333ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:464034.82496336015 Params:[29.238970918603354 2.0260438730591425e-09 0.974916835658093 59722.3] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:871 majorIterations:517] Runtime:10568}
+2025/08/24 13:19:25 init: [0.05334229943640979 1.1e-06 0.9929375296208804 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.576177783610368 [0.04849298729999463 1.4141950445253003e+11 0.963328768199724 -7.32973717125161e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:828 majorIterations:504] 9674}
+2025/08/24 13:19:25 iter: 9 res: 0.576177783610368 bestRes 0.576177783610368
+2025/08/24 13:19:25 WARNING: CPE Y0 1.414e+11 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.963329
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 508752.0916069629 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (508752.0916069629) instead of original (0.576177783610368)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 5.08752091606963e+05
+2025/08/24 13:19:25 Processing time: 153.252917ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:508752.0916069629 Params:[29.45881088292454 1.991815449244921e-09 0.963328768199724 60748.600000000006] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:828 majorIterations:504] Runtime:9674}
+2025/08/24 13:19:25 init: [0.05343021004845526 1.1e-06 0.9716492316596933 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5755072201095726 [0.048572929532595496 7.879019397065805e+10 0.9654558342696993 2.836190341368779e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:778 majorIterations:480] 9268}
+2025/08/24 13:19:25 iter: 9 res: 0.5755072201095726 bestRes 0.5755072201094827
+2025/08/24 13:19:25 WARNING: CPE Y0 7.879e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.965456
+2025/08/24 13:19:25 WARNING: Resistance 2.836e+09 is extremely high, clamping
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 468872.6258346596 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (468872.6258346596) instead of original (0.5755072201094827)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.68872625834660e+05
+2025/08/24 13:19:25 Processing time: 153.599209ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:468872.6258346596 Params:[29.589123369706122 1.986312501128587e-09 0.9748697625329275 60916.9] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:830 majorIterations:503] Runtime:13963}
+2025/08/24 13:19:25 Processing webhook for 1253c5e243ec7bb6_iter_002
+2025/08/24 13:19:25 Processing webhook for 103bf5b234565571_iter_004
+2025/08/24 13:19:25 Processing webhook for bb25c16c9269d603_iter_011
+2025/08/24 13:19:25 init: [0.053845197755972525 1.1e-06 0.9777073874139737 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5722585637716378 [0.04895018712074788 3.590276017328566e+10 0.9344701376048654 -5.2234196026227e+09] OK false 0 0 r(qr) ChiSq map[funcEvaluations:732 majorIterations:443] 6281}
+2025/08/24 13:19:25 iter: 9 res: 0.5722585637716378 bestRes 0.5722585637713954
+2025/08/24 13:19:25 WARNING: CPE Y0 3.590e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.934470
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 950176.4068610929 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (950176.4068610929) instead of original (0.5722585637713954)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 9.50176406861093e+05
+2025/08/24 13:19:25 Processing time: 155.274958ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:950176.4068610929 Params:[30.193700556661657 1.9616584930896124e-09 0.8530859769912342 61682.50000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:780 majorIterations:477] Runtime:14001}
+2025/08/24 13:19:25 Processing webhook for 1571bf2e35428713_iter_000
+2025/08/24 13:19:25 init: [0.054105560650994956 1.1e-06 0.981127720540782 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851466283 [0.049186889639875955 8.277574767497726e+10 0.9760746928299115 -2.133376596045923e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:839 majorIterations:501] 8261}
+2025/08/24 13:19:25 iter: 8 res: 0.5746870851466283 bestRes 0.5746870851465304
+2025/08/24 13:19:25 WARNING: CPE Y0 8.278e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.976075
+2025/08/24 13:19:25 base NM Solve Mode
+2025/08/24 13:19:25 Using initial values: [0.05410557860386356 1.1e-06 0.9760746928299115 110.00000000000001]
+2025/08/24 13:19:25 init: [0.0534659932370497 1.1e-06 0.9374471262015924 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5762578308943656 [0.0486054475601979 2.6164088949199436e+10 0.9764982252999983 -1.851028993709685e+10] OK false 0 0 r(qr) ChiSq map[funcEvaluations:767 majorIterations:467] 6957}
+2025/08/24 13:19:25 iter: 9 res: 0.5762578308943656 bestRes 0.5762578308940796
+2025/08/24 13:19:25 WARNING: CPE Y0 2.616e+10 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.976498
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 408108.4166435436 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (408108.4166435436) instead of original (0.5762578308940796)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 4.08108416643544e+05
+2025/08/24 13:19:25 Processing time: 156.060583ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:408108.4166435436 Params:[29.30684784677834 2.0067865873681906e-09 0.9953879302661144 60295.40000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:859 majorIterations:537] Runtime:12127}
+2025/08/24 13:19:25 Processing webhook for b795ae84016d6d50_iter_009
+2025/08/24 13:19:25 init: [0.05410557860386356 1.1e-06 0.9760746928299115 110.00000000000001]
+2025/08/24 13:19:25 resl: {0.5746870851478572 [0.04918688966613684 5.139576452773851e+09 0.998047253695757 5.2920093488003004e+08] OK false 0 0 r(qr) ChiSq map[funcEvaluations:810 majorIterations:501] 5317}
+2025/08/24 13:19:25 iter: 9 res: 0.5746870851478572 bestRes 0.5746870851465304
+2025/08/24 13:19:25 WARNING: CPE Y0 5.140e+09 is outside reasonable range, clamping
+2025/08/24 13:19:25 DEBUG: CPE exponent n=0.998047
+2025/08/24 13:19:25 WARNING: Resistance 5.292e+08 is extremely high, clamping
+2025/08/24 13:19:25 DEBUG: ChiSq calculation result: 622543.398891378 (weighting: 0)
+2025/08/24 13:19:25 INFO: Using recalculated chi-square (622543.398891378) instead of original (0.5746870851465304)
+2025/08/24 13:19:25 EIS processing completed - Method: nelder-mead, Chi-square: 6.22543398891378e+05
+2025/08/24 13:19:25 Processing time: 160.862333ms
+2025/08/24 13:19:25 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:622543.398891378 Params:[29.4134092080929 2.0234350569321047e-09 0.9273045858431356 59799.30000000001] Status:OK Solved:false Iters:0 FuncEval:0 Code:r(qr) MinUnit:ChiSq Payload:map[funcEvaluations:845 majorIterations:509] Runtime:22539}
+2025/08/24 13:19:25 Processing webhook for 87bada1b04928308_iter_007
+2025/08/24 13:19:25 📊 Timing saved: 12 spectra, 12 goroutines, 162.54 ms total, 100.00% success, 0.919 efficiency
+2025/08/24 13:19:25 🎉 Batch processing completed - ID: optimized_worker_pool_12, Total time: 162.543166ms
+..............
+📊 Processing completed
+🛑 Stopping server...
+2025/08/24 13:19:40 🛑 Received shutdown signal...
+2025/08/24 13:19:40 🛑 Shutting down server...
+2025/08/24 13:19:40 🛑 Shutting down worker pool...
+2025/08/24 13:19:40 ✅ Worker pool shutdown complete
+2025/08/24 13:19:40 ✅ Server shutdown complete
+
+=== Manual Test Complete ===
+📊 Latest results:
+2025-08-23T13:14:00+02:00  optimized_worker_pool_12  12  12  8155.79  7181.86  5299.84  8154.95  100.0  0.000000e+00  1.47   0.881  R(QR)
+2025-08-23T13:16:42+02:00  optimized_worker_pool_12  12  12  8123.09  7168.21  5346.28  8122.64  100.0  6.970049e+01  1.48   0.882  R(QR)
+2025-08-24T13:13:31+02:00  optimized_worker_pool_12  12  12  6970.99  6139.71  4493.53  6970.41  100.0  6.970049e+01  1.72   0.881  R(QR)
+2025-08-24T13:19:25+02:00  optimized_worker_pool_12  12  12  162.54   149.42   131.68   161.50   100.0  5.236695e+05  73.83  0.919  R(QR)

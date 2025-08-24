@@ -1,0 +1,661 @@
+=== Manual Concurrent Processing Test ===
+
+🔄 Cleaning up existing servers...
+Building server...
+✅ Server built
+
+📁 Creating test batch with all 12 impedance files...
+🔄 Loading impedance_data_001.csv...
+✅ Loaded 22 points from impedance_data_001.csv
+🔄 Loading impedance_data_002.csv...
+✅ Loaded 22 points from impedance_data_002.csv
+🔄 Loading impedance_data_003.csv...
+✅ Loaded 22 points from impedance_data_003.csv
+🔄 Loading impedance_data_004.csv...
+✅ Loaded 22 points from impedance_data_004.csv
+🔄 Loading impedance_data_005.csv...
+✅ Loaded 22 points from impedance_data_005.csv
+🔄 Loading impedance_data_006.csv...
+✅ Loaded 22 points from impedance_data_006.csv
+🔄 Loading impedance_data_007.csv...
+✅ Loaded 22 points from impedance_data_007.csv
+🔄 Loading impedance_data_008.csv...
+✅ Loaded 22 points from impedance_data_008.csv
+🔄 Loading impedance_data_009.csv...
+✅ Loaded 22 points from impedance_data_009.csv
+🔄 Loading impedance_data_010.csv...
+✅ Loaded 22 points from impedance_data_010.csv
+🔄 Loading impedance_data_011.csv...
+✅ Loaded 22 points from impedance_data_011.csv
+🔄 Loading impedance_data_012.csv...
+✅ Loaded 22 points from impedance_data_012.csv
+✅ Test batch created with 12 spectra from real CSV files
+
+🧵 Testing with 12 goroutines (12 spectra)...
+📡 Starting server...
+2025/08/24 13:13:21 🔧 Worker pool started with 12 workers
+2025/08/24 13:13:21 📊 Profiling disabled
+2025/08/24 13:13:21 🚀 Starting HTTP server on port 8080
+2025/08/24 13:13:21 📡 Endpoints available:
+2025/08/24 13:13:21   - Single: http://localhost:8080/eis-data
+2025/08/24 13:13:21   - Batch:  http://localhost:8080/eis-data/batch
+2025/08/24 13:13:21   - Health: http://localhost:8080/health
+2025/08/24 13:13:21   - GC:     http://localhost:8080/debug/gc
+2025/08/24 13:13:21   - Memory: http://localhost:8080/debug/memory
+✅ Server started (PID: 59403)
+📤 Sending batch request...
+2025/08/24 13:13:24 🔄 Batch processing started - ID: optimized_worker_pool_12, Spectra: 12
+2025/08/24 13:13:24 DEBUG: Processing spectrum 0 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 1 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 2 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 3 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 4 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 5 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 6 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 7 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 8 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 9 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 10 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: Processing spectrum 11 with 22 frequencies and 22 impedance points
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 DEBUG: About to call processor with 22 frequencies, config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+2025/08/24 13:13:24 🔥 REAL EIS: Processing 22 frequency points with config: &{Code:R(QR) File: InitValues:[] CutLow:0 CutHigh:0 Unity:false SmartMode:auto OptimMethod:lm Benchmark:false Flip:false ImgOut:false ImgSave:false ImgPath: ImgDPI:300 ImgSize:800 Concurrency:false Threads:12 Jobs:0 Quiet:true HTTPServer:true EnableProfiling:false}
+2025/08/24 13:13:24 Using auto-generated initial values: [50 1e-06 0.8 100]
+2025/08/24 13:13:24 Using optimization method: lm
+2025/08/24 13:13:24 LM Solve Mode
+2025/08/24 13:13:24 Base LM Solve Mode
+✅ Request successful in .032334000s
+⏳ Waiting 15 seconds for 12 EIS optimizations to complete...
+📊 Processing status:
+.....2025/08/24 13:13:28 iter: 0 res: 0.30440393037609814 bestRes 0.30440393037609814
+2025/08/24 13:13:28 WARNING: CPE Y0 5.146e-02 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=-1.094558
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 0 res: 0.32112522951897565 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 7.414e-02 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=-1.103235
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 1 res: 0.5845814199666539 bestRes 0.32112522951897565
+2025/08/24 13:13:28 DEBUG: CPE exponent n=2.491632
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 2 res: 0.5565634360590523 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -2.180e-04 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.127952
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 3 res: 0.4479300300033213 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -2.853e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.211557
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 4 res: 0.4966752640308592 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -2.998e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.302520
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 5 res: 0.3573498907104379 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -5.395e-06 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.376383
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 6 res: 0.5074125011221312 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -1.467e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.464139
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 7 res: 0.5340257610655391 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -1.470e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.567087
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 8 res: 0.5642651055125638 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -6.507e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.585870
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 9 res: 0.5516221678511322 bestRes 0.32112522951897565
+2025/08/24 13:13:28 WARNING: CPE Y0 -3.045e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.566399
+2025/08/24 13:13:28 DEBUG: ChiSq calculation result: 68.96015381731442 (weighting: 0)
+2025/08/24 13:13:28 INFO: Using recalculated chi-square (68.96015381731442) instead of original (0.32112522951897565)
+2025/08/24 13:13:28 EIS processing completed - Method: lm, Chi-square: 6.89601538173144e+01
+2025/08/24 13:13:28 Processing time: 4.49346875s
+2025/08/24 13:13:28 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:68.96015381731442 Params:[55.00000000000001 1.1e-06 0.8 1012.6294298817156] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:28 Processing webhook for 1c09a11c0cc4e559_iter_001
+2025/08/24 13:13:28 iter: 1 res: 0.5100490471725585 bestRes 0.30440393037609814
+2025/08/24 13:13:28 WARNING: CPE Y0 -1.525e-03 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=0.392923
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 2 res: 0.5846480683940759 bestRes 0.30440393037609814
+2025/08/24 13:13:28 DEBUG: CPE exponent n=2.517800
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 3 res: 0.1420657779397244 bestRes 0.1420657779397244
+2025/08/24 13:13:28 WARNING: CPE Y0 -4.591e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=0.774426
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 4 res: 0.5164287198712485 bestRes 0.1420657779397244
+2025/08/24 13:13:28 WARNING: CPE Y0 -1.875e-03 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=0.379316
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 5 res: 0.585158241209766 bestRes 0.1420657779397244
+2025/08/24 13:13:28 DEBUG: CPE exponent n=2.517780
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 6 res: 0.5852016396829843 bestRes 0.1420657779397244
+2025/08/24 13:13:28 WARNING: CPE Y0 -8.269e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=2.078908
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 7 res: 0.5562470268961959 bestRes 0.1420657779397244
+2025/08/24 13:13:28 WARNING: CPE Y0 -9.811e-04 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=0.719044
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 8 res: 0.5854214643213258 bestRes 0.1420657779397244
+2025/08/24 13:13:28 DEBUG: CPE exponent n=2.517783
+2025/08/24 13:13:28 Base LM Solve Mode
+2025/08/24 13:13:28 iter: 9 res: 0.5813673994093108 bestRes 0.1420657779397244
+2025/08/24 13:13:28 WARNING: CPE Y0 -1.639e-05 is outside reasonable range, clamping
+2025/08/24 13:13:28 DEBUG: CPE exponent n=1.938057
+2025/08/24 13:13:28 DEBUG: ChiSq calculation result: 118.96463857302884 (weighting: 0)
+2025/08/24 13:13:28 INFO: Using recalculated chi-square (118.96463857302884) instead of original (0.1420657779397244)
+2025/08/24 13:13:28 EIS processing completed - Method: lm, Chi-square: 1.18964638573029e+02
+2025/08/24 13:13:28 Processing time: 4.630718208s
+2025/08/24 13:13:28 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:118.96463857302884 Params:[35.06282865727714 1.1e-06 0.7744258550844719 1569.0295346248759] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:28 Processing webhook for 76f13e5a4accb30c_iter_000
+.2025/08/24 13:13:30 iter: 0 res: 0.3096710266112303 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 7.069e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.094132
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.58883644752764 bestRes 0.3096710266112303
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.487622
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.5859816735507878 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -6.651e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.768735
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5556358960156934 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.985e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.629194
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.5324941289794158 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -6.619e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.666118
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5586707962613348 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.094e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.645558
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5585502101634391 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.314e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.622631
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5572613014216748 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.535e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.600037
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.4873240130006774 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -5.429e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.577553
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.556985501782384 bestRes 0.3096710266112303
+2025/08/24 13:13:30 WARNING: CPE Y0 -3.290e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.555245
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 74.56414705867779 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (74.56414705867779) instead of original (0.3096710266112303)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 7.45641470586778e+01
+2025/08/24 13:13:30 Processing time: 6.015948959s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:74.56414705867779 Params:[55.00000000000001 1.1e-06 0.8 1043.6300885472697] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for f589b572448636dc_iter_010
+.2025/08/24 13:13:30 iter: 0 res: 0.33327485128537826 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 1.082e-01 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.105572
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.588245336640786 bestRes 0.33327485128537826
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.501623
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.5568586970412192 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.721e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.576881
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5761136551137697 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -4.866e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.674976
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.5648103232512095 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.890e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.728545
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5691693766225717 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -3.257e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.705457
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5636948981089692 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.330e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.681814
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5601678600613987 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.101e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.658457
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.5572077407627899 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.071e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.635465
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.5556908372550168 bestRes 0.33327485128537826
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.207e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.612710
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 61.1365021279892 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (61.1365021279892) instead of original (0.33327485128537826)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 6.11365021279892e+01
+2025/08/24 13:13:30 Processing time: 6.11162725s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:61.1365021279892 Params:[55.00000000000001 1.1e-06 0.8 840.8008461062352] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for 4a85a0abeff47d08_iter_004
+2025/08/24 13:13:30 iter: 0 res: 0.3139204406443921 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 7.625e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.100091
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.574757383225524 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.752e+04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-0.954490
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.5874956518918133 bestRes 0.3139204406443921
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.497430
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5253800728219817 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.171e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.528441
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.6228433623232695 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.178e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.644504
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5800151099828619 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -5.414e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.730969
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5739288861314137 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -9.935e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.741002
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5762935949114892 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.088e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.728152
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.5742235882163851 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.030e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.721910
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.5753181489221016 bestRes 0.3139204406443921
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.013e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.714398
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 72.47459567041949 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (72.47459567041949) instead of original (0.3139204406443921)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 7.24745956704195e+01
+2025/08/24 13:13:30 Processing time: 6.290846125s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:72.47459567041949 Params:[55.00000000000001 1.1e-06 0.8 1011.1992424185154] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for e6c5441d46ee62a7_iter_008
+2025/08/24 13:13:30 iter: 0 res: 0.31574540356209074 bestRes 0.31574540356209074
+2025/08/24 13:13:30 WARNING: CPE Y0 7.611e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.094742
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 0 res: 0.32410731841240314 bestRes 0.32410731841240314
+2025/08/24 13:13:30 WARNING: CPE Y0 9.131e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.105056
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.5872977388736436 bestRes 0.32410731841240314
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.496345
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.10383623513892144 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 -3.706e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=0.801327
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5872900595091323 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 8.862e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-0.039321
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.5867181057970979 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 3.800e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-0.025497
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.25978519326401844 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.335e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=0.809126
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.587441658105852 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 3.369e+00 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.474314
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.6068989373865213 bestRes 0.10383623513892144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.474314
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.6462011060760244 bestRes 0.10383623513892144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.474314
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.5870488489902517 bestRes 0.10383623513892144
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.971e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.915606
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 69.695645584087 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (69.695645584087) instead of original (0.10383623513892144)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 6.96956455840870e+01
+2025/08/24 13:13:30 Processing time: 6.380406375s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:69.695645584087 Params:[34.50691065662899 1.1e-06 0.8013269635224498 1058.2319593126317] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for 5f3da248b31844e3_iter_007
+2025/08/24 13:13:30 iter: 0 res: 0.3281258897926875 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 9.870e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.101977
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.5882435920696941 bestRes 0.3281258897926875
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.499784
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.4006815056661692 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -3.003e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=0.531865
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5654643776027166 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.262e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.504840
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.45953764605631253 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.514e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.595707
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.556118349764729 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.276e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.692421
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5620034592846406 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.260e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.670152
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5600356521517503 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.197e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.646954
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.5575003038786627 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.262e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.624146
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.5566068506095759 bestRes 0.3281258897926875
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.467e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.601482
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 64.07713940354755 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (64.07713940354755) instead of original (0.3281258897926875)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 6.40771394035475e+01
+2025/08/24 13:13:30 Processing time: 6.42545675s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:64.07713940354755 Params:[55.00000000000001 1.1e-06 0.8 878.3571241774066] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for 45f8bbeb5b8faea2_iter_009
+2025/08/24 13:13:30 iter: 0 res: 0.3258854713177052 bestRes 0.3258854713177052
+2025/08/24 13:13:30 WARNING: CPE Y0 9.231e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.102103
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.5866945601559524 bestRes 0.3258854713177052
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.501993
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.6098099805424883 bestRes 0.3258854713177052
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.501993
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5882259524781172 bestRes 0.3258854713177052
+2025/08/24 13:13:30 DEBUG: CPE exponent n=3.917607
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.588226993356641 bestRes 0.3258854713177052
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.275e+00 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=3.754916
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5881326463843147 bestRes 0.3258854713177052
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.345735
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5877006162371962 bestRes 0.3258854713177052
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.306e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.127302
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.6048216985668838 bestRes 0.3258854713177052
+2025/08/24 13:13:30 WARNING: CPE Y0 -4.144e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.040833
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.12984669551367953 bestRes 0.12984669551367953
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.873e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=0.992600
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.4308887354659426 bestRes 0.12984669551367953
+2025/08/24 13:13:30 WARNING: CPE Y0 -5.658e-05 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.060723
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 20.32567876269617 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (20.32567876269617) instead of original (0.12984669551367953)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 2.03256787626962e+01
+2025/08/24 13:13:30 Processing time: 6.503741166s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:20.32567876269617 Params:[32.275825814618955 1.1e-06 0.9925996059082037 1846.9545150276392] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for 82f167f63f70e799_iter_005
+2025/08/24 13:13:30 iter: 0 res: 0.32998382945814625 bestRes 0.32998382945814625
+2025/08/24 13:13:30 WARNING: CPE Y0 9.615e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.104348
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.5873790395279657 bestRes 0.32998382945814625
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.481409
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.6104820660841985 bestRes 0.32998382945814625
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.481409
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.5880840853569308 bestRes 0.32998382945814625
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.499314
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.5736505957621292 bestRes 0.32998382945814625
+2025/08/24 13:13:30 WARNING: CPE Y0 -9.916e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.807793
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5526121733341146 bestRes 0.32998382945814625
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.796e-06 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.905693
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5789223654780695 bestRes 0.32998382945814625
+2025/08/24 13:13:30 WARNING: CPE Y0 -2.151e-04 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=1.888321
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5881712940024815 bestRes 0.32998382945814625
+2025/08/24 13:13:30 WARNING: CPE Y0 1.375e+01 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.428391
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.6079182314093781 bestRes 0.32998382945814625
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.428391
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.6470192308043574 bestRes 0.32998382945814625
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.428391
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 63.76673003550592 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (63.76673003550592) instead of original (0.32998382945814625)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 6.37667300355059e+01
+2025/08/24 13:13:30 Processing time: 6.526608708s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:63.76673003550592 Params:[55.00000000000001 1.1e-06 0.8 893.9684720196942] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for 4a6064ea83aea3df_iter_002
+2025/08/24 13:13:30 iter: 0 res: 0.31293783936983144 bestRes 0.31293783936983144
+2025/08/24 13:13:30 WARNING: CPE Y0 6.936e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=-1.092351
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 1 res: 0.5878833643053795 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.476829
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 2 res: 0.610727406646327 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.476829
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 3 res: 0.6492234447400694 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=2.476829
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 4 res: 0.5893396132234795 bestRes 0.31293783936983144
+2025/08/24 13:13:30 WARNING: CPE Y0 5.094e-02 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=4.535938
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 5 res: 0.5893395891347547 bestRes 0.31293783936983144
+2025/08/24 13:13:30 WARNING: CPE Y0 -1.827e+00 is outside reasonable range, clamping
+2025/08/24 13:13:30 DEBUG: CPE exponent n=55.033543
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 6 res: 0.5893395815512983 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=55.033543
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 7 res: 0.5893395815788721 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=55.033543
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 8 res: 0.5893395815713668 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=55.033543
+2025/08/24 13:13:30 Base LM Solve Mode
+2025/08/24 13:13:30 iter: 9 res: 0.5893395815433036 bestRes 0.31293783936983144
+2025/08/24 13:13:30 DEBUG: CPE exponent n=55.033543
+2025/08/24 13:13:30 DEBUG: ChiSq calculation result: 73.7416533712608 (weighting: 0)
+2025/08/24 13:13:30 INFO: Using recalculated chi-square (73.7416533712608) instead of original (0.31293783936983144)
+2025/08/24 13:13:30 EIS processing completed - Method: lm, Chi-square: 7.37416533712608e+01
+2025/08/24 13:13:30 Processing time: 6.561006375s
+2025/08/24 13:13:30 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:73.7416533712608 Params:[55.00000000000001 1.1e-06 0.8 1049.8487910242393] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:30 Processing webhook for ea9bc3c8ebd93b46_iter_003
+2025/08/24 13:13:31 iter: 1 res: 0.5104891333140444 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.370e-03 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=0.396856
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 2 res: 0.5879093117554395 bestRes 0.31574540356209074
+2025/08/24 13:13:31 DEBUG: CPE exponent n=2.498451
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 3 res: 0.5854152255894145 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -3.164e-05 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.869512
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 4 res: 0.5611044417872026 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -4.802e-06 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.897525
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 5 res: 0.5803902935191073 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -2.045e-04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.886896
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 6 res: 0.5767156482058325 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.965e-04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.872088
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 7 res: 0.5800111234796704 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.810e-04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.859991
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 8 res: 0.5765965286699983 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.725e-04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.846568
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 9 res: 0.5795631449123353 bestRes 0.31574540356209074
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.610e-04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.834975
+2025/08/24 13:13:31 DEBUG: ChiSq calculation result: 71.6157739005623 (weighting: 0)
+2025/08/24 13:13:31 INFO: Using recalculated chi-square (71.6157739005623) instead of original (0.31574540356209074)
+2025/08/24 13:13:31 EIS processing completed - Method: lm, Chi-square: 7.16157739005623e+01
+2025/08/24 13:13:31 Processing time: 6.763075167s
+2025/08/24 13:13:31 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:71.6157739005623 Params:[55.00000000000001 1.1e-06 0.8 998.0472116824889] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:31 Processing webhook for c87a0c84219f737b_iter_006
+2025/08/24 13:13:31 iter: 0 res: 0.30410079415417934 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 6.630e-02 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=-1.092963
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 1 res: 0.5880363252824901 bestRes 0.30410079415417934
+2025/08/24 13:13:31 DEBUG: CPE exponent n=2.492953
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 2 res: 0.5867250807086871 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 -5.505e-05 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=1.914116
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 3 res: 0.5881131150874539 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 1.515e+01 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=5.436984
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 4 res: 0.5881130289696717 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 -1.913e+01 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=6.061963
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 5 res: 0.5881130922966135 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 -5.462e+02 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=8.766897
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 6 res: 0.5881131577925518 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 -6.136e+03 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=7.897387
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 7 res: 0.5881131850496583 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 2.191e+03 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=7.458515
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 8 res: 0.5881116752332377 bestRes 0.30410079415417934
+2025/08/24 13:13:31 WARNING: CPE Y0 3.830e+04 is outside reasonable range, clamping
+2025/08/24 13:13:31 DEBUG: CPE exponent n=17.617915
+2025/08/24 13:13:31 Base LM Solve Mode
+2025/08/24 13:13:31 iter: 9 res: 0.5881130911376414 bestRes 0.30410079415417934
+2025/08/24 13:13:31 DEBUG: CPE exponent n=17.617915
+2025/08/24 13:13:31 DEBUG: ChiSq calculation result: 77.08322606539711 (weighting: 0)
+2025/08/24 13:13:31 INFO: Using recalculated chi-square (77.08322606539711) instead of original (0.30410079415417934)
+2025/08/24 13:13:31 EIS processing completed - Method: lm, Chi-square: 7.70832260653971e+01
+2025/08/24 13:13:31 Processing time: 6.970016375s
+2025/08/24 13:13:31 DEBUG: Processor returned result type: goimpcore.Result, value: {Min:77.08322606539711 Params:[55.00000000000001 1.1e-06 0.8 1076.3458575802542] Status:OK Solved:false Iters:0 FuncEval:0 Code: MinUnit:ChiSq Payload:<nil> Runtime:0}
+2025/08/24 13:13:31 Processing webhook for 1aae6466ae451ac5_iter_011
+2025/08/24 13:13:31 📊 Timing saved: 12 spectra, 12 goroutines, 6970.99 ms total, 100.00% success, 0.881 efficiency
+2025/08/24 13:13:31 🎉 Batch processing completed - ID: optimized_worker_pool_12, Total time: 6.970994083s
+........
+📊 Processing completed
+🛑 Stopping server...
+2025/08/24 13:13:39 🛑 Received shutdown signal...
+2025/08/24 13:13:39 🛑 Shutting down server...
+2025/08/24 13:13:39 🛑 Shutting down worker pool...
+2025/08/24 13:13:39 ✅ Worker pool shutdown complete
+2025/08/24 13:13:39 ✅ Server shutdown complete
+
+=== Manual Test Complete ===
+📊 Latest results:
+2025-08-23T13:10:08+02:00  test                      1   1   1.19     0.05     0.05     0.05     100.0  0.000000e+00  837.43  0.045  R(QR)
+2025-08-23T13:14:00+02:00  optimized_worker_pool_12  12  12  8155.79  7181.86  5299.84  8154.95  100.0  0.000000e+00  1.47    0.881  R(QR)
+2025-08-23T13:16:42+02:00  optimized_worker_pool_12  12  12  8123.09  7168.21  5346.28  8122.64  100.0  6.970049e+01  1.48    0.882  R(QR)
+2025-08-24T13:13:31+02:00  optimized_worker_pool_12  12  12  6970.99  6139.71  4493.53  6970.41  100.0  6.970049e+01  1.72    0.881  R(QR)
