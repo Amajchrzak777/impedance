@@ -11,7 +11,8 @@ pkill -f goimpsolver 2>/dev/null || true
 lsof -ti :8080 | xargs kill -9 2>/dev/null || true
 sleep 2
 
-cd /Users/adammajchrzak/ghq/github.com/adam/masterapp/goimpcore/cmd/goimpsolver
+cd /Users/adammajchrzak/ghq/github.com/adam/masterapp/goimpcore/cmd/goimpsolver-restructured
+#cd /Users/adammajchrzak/ghq/github.com/adam/masterapp/goimpcore/cmd/goimpsolver
 
 # Function to create test data from all 12 CSV files
 create_test_batch() {
@@ -19,11 +20,11 @@ create_test_batch() {
     
     # Generate JSON with all 12 CSV files
     echo '{' > test_batch.json
-    echo '    "batch_id": "first_approach",' >> test_batch.json
+    echo '    "batch_id": "optimized_worker_pool_12",' >> test_batch.json
     echo '    "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",' >> test_batch.json
     echo '    "spectra": [' >> test_batch.json
     
-    local impedance_dir="impedance_data"
+    local impedance_dir="../goimpsolver/impedance_data"
     
     for i in {1..12}; do
         local file_num=$(printf "%03d" $i)
@@ -118,7 +119,8 @@ test_concurrency_manual() {
     
     # Start server
     echo "📡 Starting server..."
-    ./goimpsolver -http -threads=$threads -q &
+#    ./goimpsolver -http -threads=$threads -q &
+    ./goimpsolver-restructured -server -threads=$threads -quiet &
     SERVER_PID=$!
     
     # Wait for server to start
@@ -175,9 +177,10 @@ test_concurrency_manual() {
 # Main execution
 main() {
     echo "Building server..."
-    go build -o goimpsolver
-    
-    if [ ! -f "./goimpsolver" ]; then
+    go build -o goimpsolver-restructured
+#    go build -o goimpsolver
+
+    if [ ! -f "./goimpsolver-restructured" ]; then
         echo "❌ Failed to build server"
         exit 1
     fi
@@ -189,12 +192,10 @@ main() {
     create_test_batch
     echo
     
-    # Test different concurrency levels
-    test_concurrency_manual 1
-    test_concurrency_manual 5
+    # Test only 12 workers to verify fix
     test_concurrency_manual 10
     test_concurrency_manual 12
-    
+
     echo "=== Manual Test Complete ==="
     
     # Show results

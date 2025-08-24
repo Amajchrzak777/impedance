@@ -208,6 +208,8 @@ test_concurrency() {
 
 # Main test execution
 main() {
+    local workers=${1:-"1,5,10"}  # Default workers if no parameter provided
+    
     echo "Building server..."
     cd /Users/adammajchrzak/ghq/github.com/adam/masterapp/goimpcore/cmd/goimpsolver
     go build
@@ -226,11 +228,14 @@ main() {
     echo "Testing with $num_spectra real EIS spectra from CSV files"
     echo "========================================================"
     echo "Files: impedance_data_001.csv through impedance_data_012.csv"
+    echo "Workers: $workers"
     echo
     
-    test_concurrency 1 $num_spectra
-    test_concurrency 5 $num_spectra  
-    test_concurrency 10 $num_spectra
+    # Parse workers parameter (comma-separated list)
+    IFS=',' read -ra WORKER_ARRAY <<< "$workers"
+    for worker_count in "${WORKER_ARRAY[@]}"; do
+        test_concurrency "$worker_count" $num_spectra
+    done
     
     echo "=== Benchmark Complete ==="
     echo
@@ -239,7 +244,7 @@ main() {
     # Show results if file exists
     if [ -f "concurrent_timing_results.csv" ]; then
         echo "📊 Latest results:"
-        tail -n 4 concurrent_timing_results.csv | column -t -s ','
+        tail -n ${#WORKER_ARRAY[@]} concurrent_timing_results.csv | column -t -s ','
     fi
 }
 

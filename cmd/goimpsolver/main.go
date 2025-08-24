@@ -22,7 +22,7 @@ const (
 func main() {
 	config := new(Config)
 
-	flag.StringVar(&config.Code, "c", "R(CR)(CR)", "Boukamp Circuit Description code")
+	flag.StringVar(&config.Code, "c", "R(QR)", "Boukamp Circuit Description code")
 	flag.StringVar(&config.File, "f", "ASTM0.txt", "Measurement data file")
 	flag.Var(&config.InitValues, "v", "Parameters init values (array)")               // for better fit the EIS
 	flag.UintVar(&config.CutLow, "b", 0, "Cut X of begining frequencies from a file") // am not using
