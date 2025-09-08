@@ -49,7 +49,7 @@ func main() {
 func parseFlags() *config.Config {
 	cfg := config.DefaultConfig()
 
-	flag.StringVar(&cfg.Code, "R(QR)", cfg.Code, "Circuit code (e.g., R(RC))")
+	flag.StringVar(&cfg.Code, "circuit", cfg.Code, "Circuit code (e.g., R(QR), R(CR), R(CR)(CR), R(QR)(QR))")
 	flag.StringVar(&cfg.File, "file", cfg.File, "Input file path")
 	flag.UintVar(&cfg.Threads, "threads", cfg.Threads, "Number of worker threads")
 	flag.BoolVar(&cfg.Quiet, "quiet", cfg.Quiet, "Suppress verbose output")
