@@ -11,11 +11,6 @@ import (
 // Calculator handles impedance calculations for circuit elements
 type Calculator struct{}
 
-// NewCalculator creates a new impedance calculator
-func NewCalculator() *Calculator {
-	return &Calculator{}
-}
-
 // CalculateElementImpedances calculates impedance for each circuit element
 func (c *Calculator) CalculateElementImpedances(frequencies []float64, parameters []float64, elementNames []string) []models.ElementImpedance {
 	var result []models.ElementImpedance

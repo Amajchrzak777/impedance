@@ -16,7 +16,7 @@ RUN go mod tidy && go mod download
 COPY . .
 
 # Fix go.sum with all dependencies and build
-RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -o goimpsolver ./cmd/goimpsolver
+RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -o goimpsolver-restructured ./cmd/goimpsolver-restructured
 
 # Runtime stage
 FROM alpine:latest
@@ -26,10 +26,10 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy the binary from builder stage
-COPY --from=builder /app/goimpsolver .
+COPY --from=builder /app/goimpsolver-restructured .
 
 # Expose port
 EXPOSE 8080
 
 # Default command
-CMD ["./goimpsolver"]
+CMD ["./goimpsolver-restructured"]

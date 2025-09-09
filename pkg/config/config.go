@@ -11,13 +11,12 @@ func (a *ArrayFlags) String() string {
 	return "ArrayFlags"
 }
 
-func (a *ArrayFlags) Set(value string) error {
+func (a *ArrayFlags) Set(value string) (err error) {
 	if val, err := strconv.ParseFloat(value, 64); err == nil {
 		*a = append(*a, val)
-		return nil
-	} else {
-		return err
 	}
+
+	return err
 }
 
 // Config holds all configuration settings for the EIS solver
@@ -60,12 +59,13 @@ func DefaultConfig() *Config {
 	return &Config{
 		Code:        "R(QR)",
 		Threads:     5,
-		OptimMethod: "nelder-mead",
+		OptimMethod: "levenberg-marquardt", // Default fallback, will be overridden by CLI
 		SmartMode:   "eis",
 		ImgDPI:      300,
 		ImgSize:     800,
 		Quiet:       false,
 		HTTPServer:  true,
+		Unity:       true,
 	}
 }
 

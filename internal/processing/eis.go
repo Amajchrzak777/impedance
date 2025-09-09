@@ -38,20 +38,9 @@ func (p *EISProcessor) Process(freqs []float64, impData [][2]float64, cfg *confi
 		return goimpcore.Result{}, fmt.Errorf("frequency and impedance data length mismatch: %d vs %d", len(freqs), len(impData))
 	}
 
-	// Validate impedance data
-	for i, imp := range impData {
-		if len(imp) != 2 {
-			return goimpcore.Result{}, fmt.Errorf("invalid impedance data format at index %d", i)
-		}
-	}
-
 	log.Printf("🔥 REAL EIS: Processing %d frequency points with config: %+v", len(freqs), cfg)
 
 	code := strings.ToLower(cfg.Code)
-
-	if cfg.OptimMethod == "all" {
-		return p.runAllOptimizationMethods(code, freqs, impData, cfg)
-	}
 
 	return p.runSingleOptimizationMethod(code, freqs, impData, cfg, cfg.OptimMethod)
 }
@@ -59,33 +48,34 @@ func (p *EISProcessor) Process(freqs []float64, impData [][2]float64, cfg *confi
 func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64, impData [][2]float64, cfg *config.Config, method string) (goimpcore.Result, error) {
 	solver := goimpcore.NewSolver(code, freqs, impData)
 
-	// Use provided InitValues or generate automatic ones
+	// Use provided InitValues or generate data-driven ones
 	if len(cfg.InitValues) > 0 {
 		solver.InitValues = []float64(cfg.InitValues)
 		log.Printf("Using provided initial values: %v", solver.InitValues)
 	} else {
-		solver.InitValues = p.generateInitialValues(code)
-		log.Printf("Using auto-generated initial values: %v", solver.InitValues)
+		// Use data-driven init values from the solver's analysis
+		solver.InitValues = solver.InitValues // Will be empty, letting solver.Solve() call findInitValues
+		log.Printf("Using data-driven initial values (will be generated from impedance data)")
 	}
 
-	if cfg.Unity {
-		solver.Weighting = goimpcore.UNITY
-	} else {
+	// Method-specific optimization parameters
+	methodMinFunc := minFunc
+	methodMaxIters := maxIterations
+
+	if !cfg.Unity {
 		solver.Weighting = goimpcore.MODULUS
 	}
 
 	// Set the solver method based on the optimization method
 	switch method {
-	case "nelder-mead":
+	case "nelder-mead", "nm":
 		solver.SmartMode = "eis" // Use EIS smart mode for multi-try approach
+		methodMinFunc = 0.0135
+		methodMaxIters = 10
 	case "levenberg-marquardt", "lm":
 		solver.SmartMode = "lm"
-	case "gradient-descent", "gd":
-		solver.SmartMode = "gd"
-	case "lbfgs":
-		solver.SmartMode = "lbfgs"
-	case "newton":
-		solver.SmartMode = "newton"
+		methodMinFunc = 0.0135
+		methodMaxIters = 10 // Increased from 3 to allow proper convergence
 	default:
 		log.Printf("Unknown optimization method '%s', using Nelder-Mead", method)
 		solver.SmartMode = "eis"
@@ -93,10 +83,12 @@ func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64,
 
 	log.Printf("Using optimization method: %s", method)
 
-	// Time the optimization
+	// Time the optimization with method-specific parameters
 	startTime := time.Now()
-	res := solver.Solve(minFunc, maxIterations)
+	res := solver.Solve(methodMinFunc, methodMaxIters)
 	duration := time.Since(startTime)
+
+	log.Printf("Method %s: minFunc=%.3f, maxIters=%d, actual_chiSq=%.6f", method, methodMinFunc, methodMaxIters, res.Min)
 
 	// Ensure consistent chi-square calculation for all methods
 	// Skip recalculation for EIS mode as it handles scaling internally
@@ -137,40 +129,6 @@ func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64,
 	return res, nil
 }
 
-func (p *EISProcessor) runAllOptimizationMethods(code string, freqs []float64, impData [][2]float64, cfg *config.Config) (goimpcore.Result, error) {
-	methods := []string{"nelder-mead", "levenberg-marquardt", "gradient-descent", "lbfgs", "newton"}
-	var bestResult goimpcore.Result
-	bestChiSq := math.Inf(1)
-
-	log.Printf("Running all optimization methods for comparison...")
-
-	for _, method := range methods {
-		log.Printf("Testing method: %s", method)
-		result, err := p.runSingleOptimizationMethod(code, freqs, impData, cfg, method)
-		if err != nil {
-			continue
-		}
-
-		if result.Status != "ERROR" && result.Min < bestChiSq {
-			bestResult = result
-			bestChiSq = result.Min
-			log.Printf("New best method: %s with chi-square: %.12e", method, result.Min)
-		}
-	}
-
-	if bestResult.Status == "" {
-		log.Printf("All methods failed")
-		return goimpcore.Result{
-			Status: "ERROR",
-			Min:    math.Inf(1),
-			Params: []float64{},
-		}, fmt.Errorf("all optimization methods failed")
-	}
-
-	log.Printf("Best overall result: chi-square=%.12e", bestResult.Min)
-	return bestResult, nil
-}
-
 // generateInitialValues creates reasonable default initial values for different circuit codes
 func (p *EISProcessor) generateInitialValues(code string) []float64 {
 	switch strings.ToLower(code) {
@@ -180,6 +138,9 @@ func (p *EISProcessor) generateInitialValues(code string) []float64 {
 	case "r(qr)":
 		// R1, Q1_Y0, Q1_n, R2
 		return []float64{50.0, 1e-6, 0.8, 100.0}
+	case "r(qr)(qr)":
+		// R1, Q1_Y0, Q1_n, R2, Q2_Y0, Q2_n, R3 (7 parameters)
+		return []float64{50.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0}
 	case "r(cr)(cr)":
 		// R1, C1, R2, C2, R3 (5 parameters)
 		return []float64{50.0, 1e-6, 100.0, 1e-6, 100.0}

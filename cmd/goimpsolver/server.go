@@ -20,8 +20,8 @@ var (
 	globalWorkerPool *WorkerPool
 )
 
-// SpectrumTiming tracks performance metrics for individual spectrum processing
-type SpectrumTiming struct {
+// EISMetricsDataResult tracks performance metrics for individual spectrum processing
+type EISMetricsDataResult struct {
 	Iteration      int           `json:"iteration"`
 	ProcessingTime time.Duration `json:"processing_time_ms"`
 	ChiSquare      float64       `json:"chi_square"`
@@ -385,7 +385,7 @@ func handleBatchEISData(w http.ResponseWriter, r *http.Request) {
 	batchStartTime := time.Now()
 
 	// Prepare data structures for optimized processing
-	spectrumTimings := make([]SpectrumTiming, len(batch.Spectra))
+	eisMetricsDataResults := make([]EISMetricsDataResult, len(batch.Spectra))
 	resultsReceived := 0
 
 	// Process batch using optimized worker pool
@@ -436,7 +436,7 @@ func handleBatchEISData(w http.ResponseWriter, r *http.Request) {
 		for resultsReceived < len(batch.Spectra) {
 			if result, ok := globalWorkerPool.GetResult(); ok {
 				// Record timing (lock-free via channels)
-				spectrumTimings[result.Iteration] = SpectrumTiming{
+				eisMetricsDataResults[result.Iteration] = EISMetricsDataResult{
 					Iteration:      result.Iteration,
 					ProcessingTime: result.ProcessingTime,
 					ChiSquare:      result.Result.Min,
@@ -484,7 +484,7 @@ func handleBatchEISData(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Save timing results to file
-		saveConcurrentTimingResults(batch.BatchID, totalBatchTime, spectrumTimings, concurrency)
+		saveConcurrentTimingResults(batch.BatchID, totalBatchTime, eisMetricsDataResults, concurrency)
 
 		log.Printf("🎉 Batch processing completed - ID: %s, Total time: %v", batch.BatchID, totalBatchTime)
 	}()
@@ -502,7 +502,7 @@ func handleBatchEISData(w http.ResponseWriter, r *http.Request) {
 }
 
 // saveConcurrentTimingResults saves timing data to a CSV file for performance analysis
-func saveConcurrentTimingResults(batchID string, totalTime time.Duration, spectrumTimings []SpectrumTiming, concurrency int) {
+func saveConcurrentTimingResults(batchID string, totalTime time.Duration, eisMetricsDataResults []EISMetricsDataResult, concurrency int) {
 	filename := "concurrent_timing_results.csv"
 
 	// Check if file exists to decide on header
@@ -551,7 +551,7 @@ func saveConcurrentTimingResults(batchID string, totalTime time.Duration, spectr
 	var successful int
 	var totalChiSq float64
 
-	for _, timing := range spectrumTimings {
+	for _, timing := range eisMetricsDataResults {
 		totalSpectrumTime += timing.ProcessingTime
 		if timing.ProcessingTime < minTime {
 			minTime = timing.ProcessingTime
@@ -565,7 +565,7 @@ func saveConcurrentTimingResults(batchID string, totalTime time.Duration, spectr
 		}
 	}
 
-	numSpectra := len(spectrumTimings)
+	numSpectra := len(eisMetricsDataResults)
 	avgSpectrumTime := totalSpectrumTime / time.Duration(numSpectra)
 	successRate := float64(successful) / float64(numSpectra) * 100
 	avgChiSq := 0.0
@@ -582,8 +582,8 @@ func saveConcurrentTimingResults(batchID string, totalTime time.Duration, spectr
 
 	// Get circuit code from first spectrum timing (should be consistent across all spectra)
 	circuitCode := "Unknown"
-	if len(spectrumTimings) > 0 {
-		circuitCode = spectrumTimings[0].CircuitCode
+	if len(eisMetricsDataResults) > 0 {
+		circuitCode = eisMetricsDataResults[0].CircuitCode
 	}
 
 	// Write timing record

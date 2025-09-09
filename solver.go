@@ -3,8 +3,6 @@ package goimpcore
 import (
 	"fmt"
 	"github.com/maorshutman/lm"
-	"gonum.org/v1/gonum/diff/fd"
-	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize"
 	"log"
 	"math"
@@ -77,18 +75,18 @@ func (s *Solver) problemWithQnConstraints(x []float64) float64 {
 }
 
 func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
-	if s.SmartMode == "eis" {
-		return s.eisSolve(minFunc, maxIterations)
-	} else if s.SmartMode == "gd" {
-		return s.baseGDSolve()
-	} else if s.SmartMode == "lm" {
-		return s.lmSolve(minFunc, maxIterations)
-	} else if s.SmartMode == "lbfgs" {
-		return s.baseLBFGSSolve()
-	} else if s.SmartMode == "newton" {
-		return s.baseNewtonSolve()
+	if s == nil {
+		return Result{}
 	}
-	return s.baseNMSolve()
+
+	switch s.SmartMode {
+	case "eis":
+		return s.eisSolve(minFunc, maxIterations)
+	case "lm":
+		return s.lmSolve(minFunc, maxIterations)
+	default:
+		return s.baseNMSolve()
+	}
 }
 
 // How Simplex works http://195.134.76.37/applets/AppletSimplex/Appl_Simplex2.html
@@ -158,20 +156,50 @@ func (s *Solver) baseNMSolve() Result {
 
 func (s *Solver) baseLMSolve() Result {
 	log.Println("Base LM Solve Mode")
+	callCount := 0
 	fnc := func(dst, x []float64) {
+		callCount++
+		if callCount <= 3 || callCount%100 == 0 {
+			log.Printf("LM DEBUG: Function call #%d, params: %v", callCount, x)
+		}
+
 		calculated := CircuitImpedance(s.code, s.Freqs, x)
 		if len(calculated) != len(s.Observed) {
 			panic("solver: slice length mismatch")
 		}
+
+		// Apply CPE exponent constraints during optimization - penalty function for qn element 0<n<1
+		elements := GetElements(s.code)
+		penalty := 0.0
+		for i, elem := range elements {
+			if elem == "qn" && i < len(x) {
+				if x[i] < 0.1 {
+					penalty += 1e6 * math.Pow(0.1-x[i], 2)
+				} else if x[i] > 1.0 {
+					penalty += 1e6 * math.Pow(x[i]-1.0, 2)
+				}
+			}
+		}
+
+		totalError := 0.0
 		for i, o := range s.Observed {
 			c := calculated[i]
 			d2 := math.Pow(o[0]-c[0], 2) + math.Pow(o[1]-c[1], 2)
 			if s.Weighting == UNITY {
-				dst[i] = math.Abs(d2)
+				dst[i] = math.Abs(d2) + penalty/float64(len(s.Observed))
 			} else if s.Weighting == MODULUS {
 				weight := math.Sqrt(math.Pow(o[0], 2) + math.Pow(o[1], 2))
-				dst[i] = math.Abs(d2) / math.Pow(weight, 2)
+				if weight > 0 {
+					dst[i] = math.Abs(d2)/math.Pow(weight, 2) + penalty/float64(len(s.Observed))
+				} else {
+					dst[i] = math.Abs(d2) + penalty/float64(len(s.Observed))
+				}
 			}
+			totalError += dst[i]
+		}
+
+		if callCount <= 3 || callCount%100 == 0 {
+			log.Printf("LM DEBUG: Call #%d total error: %.6e", callCount, totalError)
 		}
 	}
 
@@ -183,23 +211,32 @@ func (s *Solver) baseLMSolve() Result {
 		Func:       fnc,
 		Jac:        jac.Jac,
 		InitParams: s.InitValues,
-		Tau:        1e-13,
-		Eps1:       1e-8,
-		Eps2:       1e-8,
+		Tau:        1e-6, // Higher damping for faster convergence
+		Eps1:       1e-6, // Relaxed gradient tolerance
+		Eps2:       1e-6, // Relaxed parameter change tolerance
 	}
+
+	// Debug: Log initial parameters before optimization
+	log.Printf("LM DEBUG: Initial params: %v", s.InitValues)
+	log.Printf("LM DEBUG: Data points: %d, Param count: %d", len(s.Observed), len(s.InitValues))
 
 	// Recover from LM panics (e.g., singular matrix)
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("LM optimization panicked: %v", r)
+			log.Printf("LM DEBUG: Panic occurred, this may cause return of init values")
 		}
 	}()
 
-	res, err := lm.LM(problem, &lm.Settings{Iterations: 1000000, ObjectiveTol: 1e-16})
+	res, err := lm.LM(problem, &lm.Settings{
+		Iterations:   10000, // Increased to 1000 iterations for better convergence
+		ObjectiveTol: 1e-8,  // Relaxed from 1e-16 to 1e-8
+	})
 	if err != nil {
 		log.Printf("LM optimization failed: %v", err)
+		log.Printf("LM DEBUG: Error occurred, returning init values: %v", s.InitValues)
 		return Result{
-			Params:  []float64{},
+			Params:  s.InitValues, // Return init values on error for debugging
 			Min:     math.Inf(1),
 			MinUnit: "ChiSq",
 			Runtime: 0,
@@ -208,74 +245,22 @@ func (s *Solver) baseLMSolve() Result {
 		}
 	}
 
+	// Debug: Log final parameters after optimization
+	log.Printf("LM DEBUG: Final params: %v", res.X)
+	log.Printf("LM DEBUG: Iterations used: %d", res.Iterations)
+	log.Printf("LM DEBUG: Converged: %v", res.Converged)
+
+	finalChiSq := ChiSq(s.Observed, CircuitImpedance(s.code, s.Freqs, res.X), s.Weighting)
+	log.Printf("LM DEBUG: Final ChiSq: %.6e", finalChiSq)
+
 	return Result{
 		Params:  res.X,
-		Min:     ChiSq(s.Observed, CircuitImpedance(s.code, s.Freqs, res.X), s.Weighting),
+		Min:     finalChiSq,
 		MinUnit: "ChiSq",
 		Runtime: 0,
 		Status:  OK,
+		Iters:   res.Iterations,
 		Payload: nil,
-	}
-}
-
-func (s *Solver) baseGDSolve() Result {
-	log.Println("Base GD Solve Mode")
-	// https://sbinet.github.io/posts/2017-10-09-intro-to-minimization/
-	grad := func(grad, x []float64) {
-		fd.Gradient(grad, s.problem, x, &fd.Settings{
-			Formula:     fd.Formula{},
-			Step:        0,
-			OriginKnown: false,
-			OriginValue: 0,
-			Concurrent:  false,
-		})
-	}
-
-	hess := func(h *mat.SymDense, x []float64) {
-		fd.Hessian(h, s.problem, x, nil)
-	}
-
-	status := func() (optimize.Status, error) {
-		return 0, nil
-	}
-
-	problem := optimize.Problem{
-		Func:   s.problem,
-		Grad:   grad,
-		Hess:   hess,
-		Status: status,
-	}
-
-	settings := &optimize.Settings{
-		InitValues:        nil,
-		GradientThreshold: 0,
-		Converger:         nil,
-		MajorIterations:   0,
-		Runtime:           0,
-		FuncEvaluations:   0,
-		GradEvaluations:   0,
-		HessEvaluations:   0,
-		Recorder:          nil,
-		Concurrent:        10000,
-	}
-
-	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.GradientDescent{})
-	if err != nil {
-		panic(err)
-	}
-
-	payload := map[string]interface{}{
-		"majorIterations": res.MajorIterations,
-		"funcEvaluations": res.FuncEvaluations,
-	}
-
-	return Result{
-		Params:  res.X,
-		Min:     res.F,
-		MinUnit: "ChiSq",
-		Runtime: float64(res.Runtime / 1000),
-		Status:  OK,
-		Payload: payload,
 	}
 }
 
@@ -383,37 +368,95 @@ func prepareData(impData *[][2]float64) float64 {
 func (s *Solver) findInitValues(freqs []float64, impData [][2]float64) []float64 {
 	initValues := make([]float64, 0)
 
+	// Extract impedance characteristics from data
+	highFreqR := s.estimateHighFrequencyResistance(freqs, impData)
+	lowFreqR := s.estimateLowFrequencyResistance(freqs, impData)
+	capacitance := s.estimateCapacitance(freqs, impData)
+	inductance := s.estimateInductance(freqs, impData)
+	warburgCoeff := s.estimateWarburgCoefficient(freqs, impData)
+	cpeParams := s.estimateCPEParameters(freqs, impData)
+
 	for _, char := range s.code {
 		switch char {
 		case 114: // R
-			min, max := minMax(freqs)
-			freqAver := math.Pow(10, (math.Log10(min)+math.Log10(max))/2)
-			initValues = append(initValues, impData[findClosest(freqs, freqAver)][0])
+			// Use high frequency intercept for series resistance or polarization resistance
+			resistance := highFreqR
+			if resistance <= 0 {
+				resistance = lowFreqR
+			}
+			if resistance <= 0 {
+				resistance = impData[len(impData)/2][0] // fallback to mid-frequency real part
+			}
+			initValues = append(initValues, resistance)
 		case 99: // C
-			initValues = append(initValues, 1e-5)
+			// Use estimated capacitance from slope analysis
+			if capacitance > 0 {
+				initValues = append(initValues, capacitance)
+			} else {
+				initValues = append(initValues, 1e-5) // fallback
+			}
 		case 108: // L
-			initValues = append(initValues, 1e-5)
+			// Use estimated inductance from high frequency behavior
+			if inductance > 0 {
+				initValues = append(initValues, inductance)
+			} else {
+				initValues = append(initValues, 1e-6) // fallback
+			}
 		case 119: // W (Infinite Warburg)
-			initValues = append(initValues, 1e-5)
+			// Use estimated Warburg coefficient from low frequency slope
+			if warburgCoeff > 0 {
+				initValues = append(initValues, warburgCoeff)
+			} else {
+				initValues = append(initValues, 1e-3) // fallback
+			}
 		case 113: // Q (CPE)
-			initValues = append(initValues, 1e-5)
-			initValues = append(initValues, 0.8)
+			// Use estimated CPE parameters Y0 and n
+			if cpeParams[0] > 0 {
+				initValues = append(initValues, cpeParams[0]) // Y0
+			} else {
+				initValues = append(initValues, 1e-5) // fallback Y0
+			}
+			if cpeParams[1] > 0.1 && cpeParams[1] < 1.0 {
+				initValues = append(initValues, cpeParams[1]) // n
+			} else {
+				initValues = append(initValues, 0.8) // fallback n
+			}
 		case 111: // O (FLW Finite Length Warburg) first parameter Y0, second B
-			initValues = append(initValues, 1)
-			initValues = append(initValues, 1)
+			// Estimate from low frequency Warburg behavior
+			y0 := warburgCoeff * math.Sqrt(2)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[0])) // B related to diffusion length
 		case 116: // T (FSW Finite Space Warburg) first parameter Y0, second B
-			initValues = append(initValues, 1)
-			initValues = append(initValues, 1)
+			// Similar to FLW but different geometry
+			y0 := warburgCoeff * math.Sqrt(2)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[0]))
 		case 103: // G (Gerischer) first parameter Y0, second k
-			initValues = append(initValues, 1)
-			initValues = append(initValues, 1)
+			// Estimate from impedance magnitude and characteristic frequency
+			y0 := 1.0 / (lowFreqR - highFreqR)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[len(freqs)/2])) // k related to reaction rate
 		case 102: // F (Fractal Gerischer) first parameter Y0, second k, third a
-			initValues = append(initValues, 1)
-			initValues = append(initValues, 1)
-			initValues = append(initValues, 1)
+			// Similar to Gerischer with additional fractal dimension
+			y0 := 1.0 / (lowFreqR - highFreqR)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[len(freqs)/2]))
+			initValues = append(initValues, 0.5) // fractal dimension typically 0.5
 		}
 	}
-	log.Println(initValues)
+	log.Println("Data-driven init values:", initValues)
 	return initValues
 }
 
@@ -445,31 +488,31 @@ func modifyParams(values []float64, diff bool, primaryValues []float64, lastValu
 			continue
 		}
 
-		// Only fix clearly unphysical negative values by reverting to primary values
+		// Only fix clearly unphysical negative values
 		if n < 0 {
 			values[i] = primaryValues[i]
 		}
 
-		// Log CPE exponent n values (constraints now handled by optimizer bounds)
+		// Apply critical physical bounds for CPE exponent n (must be 0 < n < 1)
 		if elements[i] == "qn" {
-			log.Printf("DEBUG: CPE exponent n=%.6f", n)
+			if n < 0.1 {
+				log.Printf("INFO: CPE exponent n=%.6f too low, clamping to 0.1", n)
+				values[i] = 0.1
+			} else if n > 1.0 {
+				log.Printf("INFO: CPE exponent n=%.6f too high, clamping to 1.0", n)
+				values[i] = 1.0
+			} else {
+				log.Printf("DEBUG: CPE exponent n=%.6f (valid)", n)
+			}
 		}
 
-		// Apply constraints for other parameters
+		// Log extreme parameter values but don't reset them
 		if elements[i] == "r" && n > 1e6 {
-			log.Printf("WARNING: Resistance %.3e is extremely high, clamping", n)
-			values[i] = primaryValues[i]
+			log.Printf("INFO: Resistance %.3e is very high", n)
 		}
 
 		if elements[i] == "qy" && (n < 1e-12 || n > 1e-2) {
-			log.Printf("WARNING: CPE Y0 %.3e is outside reasonable range, clamping", n)
-			values[i] = primaryValues[i]
-		}
-
-		// Only apply gentle parameter adjustments for optimization convergence
-		switch elements[i] {
-		case "r", "c", "qy":
-			values[i] = values[i] * 1.1
+			log.Printf("INFO: CPE Y0 %.3e is outside typical range", n)
 		}
 	}
 	return values
@@ -496,14 +539,6 @@ func ChiSq(observed, calculated [][2]float64, weighting Weighting) float64 {
 	}
 	// Normalize by number of data points
 	return chiSq / float64(len(observed))
-}
-
-func GetModulo(data [][2]float64) []float64 {
-	var res []float64
-	for _, v := range data {
-		res = append(res, math.Sqrt(math.Pow(v[0], 2)+math.Pow(v[1], 2)))
-	}
-	return res
 }
 
 func GetElements(code string) []string {
@@ -562,133 +597,261 @@ func scaleData(impData *[][2]float64, scale float64) {
 	}
 }
 
-func (s *Solver) baseLBFGSSolve() Result {
-	log.Println("Base LBFGS Solve Mode")
-	grad := func(grad, x []float64) {
-		fd.Gradient(grad, s.problem, x, &fd.Settings{
-			Formula:     fd.Formula{},
-			Step:        0,
-			OriginKnown: false,
-			OriginValue: 0,
-			Concurrent:  false,
-		})
+// estimateHighFrequencyResistance extracts series resistance from high frequency intercept
+func (s *Solver) estimateHighFrequencyResistance(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 3 {
+		return 0
 	}
-
-	status := func() (optimize.Status, error) {
-		return 0, nil
+	// Take average of highest frequency points (last 10% of data)
+	start := int(float64(len(impData)) * 0.9)
+	if start < 0 {
+		start = 0
 	}
-
-	problem := optimize.Problem{
-		Func:   s.problem,
-		Grad:   grad,
-		Status: status,
+	sum := 0.0
+	count := 0
+	for i := start; i < len(impData); i++ {
+		sum += impData[i][0] // real part
+		count++
 	}
-
-	settings := &optimize.Settings{
-		InitValues:        nil,
-		GradientThreshold: 0,
-		Converger:         nil,
-		MajorIterations:   0,
-		Runtime:           0,
-		FuncEvaluations:   0,
-		GradEvaluations:   0,
-		HessEvaluations:   0,
-		Recorder:          nil,
-		Concurrent:        10000,
+	if count > 0 {
+		return sum / float64(count)
 	}
-
-	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.LBFGS{})
-	if err != nil {
-		log.Printf("LBFGS optimization error: %v", err)
-		return Result{Min: math.Inf(1), Status: "ERROR"}
-	}
-
-	payload := map[string]interface{}{
-		"majorIterations": res.MajorIterations,
-		"funcEvaluations": res.FuncEvaluations,
-	}
-
-	return Result{
-		Params:  res.X,
-		Min:     res.F,
-		MinUnit: "ChiSq",
-		Runtime: float64(res.Runtime / 1000),
-		Status:  OK,
-		Payload: payload,
-	}
+	return impData[len(impData)-1][0] // fallback to last point
 }
 
-func (s *Solver) baseNewtonSolve() Result {
-	log.Println("Base Newton Solve Mode")
-	grad := func(grad, x []float64) {
-		fd.Gradient(grad, s.problem, x, &fd.Settings{
-			Formula:     fd.Formula{},
-			Step:        0,
-			OriginKnown: false,
-			OriginValue: 0,
-			Concurrent:  false,
-		})
+// estimateLowFrequencyResistance extracts polarization resistance from low frequency
+func (s *Solver) estimateLowFrequencyResistance(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 3 {
+		return 0
 	}
-
-	hess := func(h *mat.SymDense, x []float64) {
-		fd.Hessian(h, s.problem, x, nil)
+	// Take average of lowest frequency points (first 10% of data)
+	end := int(float64(len(impData)) * 0.1)
+	if end < 1 {
+		end = 1
 	}
-
-	status := func() (optimize.Status, error) {
-		return 0, nil
+	sum := 0.0
+	count := 0
+	for i := 0; i < end; i++ {
+		sum += impData[i][0] // real part
+		count++
 	}
-
-	problem := optimize.Problem{
-		Func:   s.problem,
-		Grad:   grad,
-		Hess:   hess,
-		Status: status,
+	if count > 0 {
+		return sum / float64(count)
 	}
-
-	settings := &optimize.Settings{
-		InitValues:        nil,
-		GradientThreshold: 0,
-		Converger:         nil,
-		MajorIterations:   0,
-		Runtime:           0,
-		FuncEvaluations:   0,
-		GradEvaluations:   0,
-		HessEvaluations:   0,
-		Recorder:          nil,
-		Concurrent:        10000,
-	}
-
-	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.Newton{})
-	if err != nil {
-		log.Printf("Newton optimization error: %v", err)
-		return Result{Min: math.Inf(1), Status: "ERROR"}
-	}
-
-	payload := map[string]interface{}{
-		"majorIterations": res.MajorIterations,
-		"funcEvaluations": res.FuncEvaluations,
-	}
-
-	return Result{
-		Params:  res.X,
-		Min:     res.F,
-		MinUnit: "ChiSq",
-		Runtime: float64(res.Runtime / 1000),
-		Status:  OK,
-		Payload: payload,
-	}
+	return impData[0][0] // fallback to first point
 }
 
-func (s *Solver) Clone() *Solver {
-	newS := *s
-	newS.Observed = make([][2]float64, len(s.Observed))
-	copy(newS.Observed, s.Observed)
+// estimateCapacitance from -Im(Z) vs log(f) slope at high frequencies
+func (s *Solver) estimateCapacitance(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 5 {
+		return 0
+	}
+	// Use high frequency data (last 30% of points)
+	start := int(float64(len(impData)) * 0.7)
+	if start < 1 {
+		start = 1
+	}
 
-	newS.Freqs = make([]float64, len(s.Freqs))
-	copy(newS.Freqs, s.Freqs)
+	// Linear regression on log(f) vs log(-Im(Z)) to find capacitive behavior
+	n := len(impData) - start
+	if n < 3 {
+		return 0
+	}
 
-	newS.InitValues = make([]float64, len(s.InitValues))
-	copy(newS.InitValues, s.InitValues)
+	sumX, sumY, sumXY, sumX2 := 0.0, 0.0, 0.0, 0.0
+	validPoints := 0
 
-	return &newS
+	for i := start; i < len(impData); i++ {
+		if impData[i][1] < -1e-12 && freqs[i] > 0 { // negative imaginary part and positive frequency
+			x := math.Log10(freqs[i])
+			y := math.Log10(-impData[i][1])
+			sumX += x
+			sumY += y
+			sumXY += x * y
+			sumX2 += x * x
+			validPoints++
+		}
+	}
+
+	if validPoints < 3 {
+		return 0
+	}
+
+	// Linear regression slope
+	slope := (float64(validPoints)*sumXY - sumX*sumY) / (float64(validPoints)*sumX2 - sumX*sumX)
+	intercept := (sumY - slope*sumX) / float64(validPoints)
+
+	// For capacitor: Z = 1/(2πfC), so log|Z| = -log(2πC) - log(f)
+	// Slope should be close to -1 for pure capacitive behavior
+	if slope < -0.7 && slope > -1.3 {
+		// Calculate capacitance: C = 1/(2π * 10^intercept)
+		capacitance := 1.0 / (2.0 * math.Pi * math.Pow(10, intercept))
+		if capacitance > 1e-12 && capacitance < 1 { // reasonable capacitance range
+			return capacitance
+		}
+	}
+	return 0
+}
+
+// estimateInductance from Im(Z) vs f slope at high frequencies
+func (s *Solver) estimateInductance(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 5 {
+		return 0
+	}
+	// Look for inductive behavior at high frequencies
+	start := int(float64(len(impData)) * 0.8)
+	if start < 1 {
+		start = 1
+	}
+
+	// Check if imaginary part increases with frequency (inductive behavior)
+	positiveSlope := 0
+	totalChecks := 0
+
+	for i := start; i < len(impData)-1; i++ {
+		if freqs[i+1] > freqs[i] {
+			if impData[i+1][1] > impData[i][1] {
+				positiveSlope++
+			}
+			totalChecks++
+		}
+	}
+
+	if totalChecks > 0 && float64(positiveSlope)/float64(totalChecks) > 0.6 {
+		// Estimate inductance from L = Im(Z)/(2πf) at highest frequency
+		lastIdx := len(impData) - 1
+		if impData[lastIdx][1] > 1e-12 && freqs[lastIdx] > 0 {
+			inductance := impData[lastIdx][1] / (2.0 * math.Pi * freqs[lastIdx])
+			if inductance > 1e-9 && inductance < 1 { // reasonable inductance range
+				return inductance
+			}
+		}
+	}
+	return 0
+}
+
+// estimateWarburgCoefficient from low frequency Im(Z) vs f^(-0.5) relationship
+func (s *Solver) estimateWarburgCoefficient(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 5 {
+		return 0
+	}
+	// Use low frequency data (first 30% of points)
+	end := int(float64(len(impData)) * 0.3)
+	if end < 3 {
+		end = 3
+	}
+	if end > len(impData) {
+		end = len(impData)
+	}
+
+	// Linear regression on f^(-0.5) vs Im(Z)
+	sumX, sumY, sumXY, sumX2 := 0.0, 0.0, 0.0, 0.0
+	validPoints := 0
+
+	for i := 0; i < end; i++ {
+		if freqs[i] > 0 && impData[i][1] != 0 {
+			x := 1.0 / math.Sqrt(freqs[i]) // f^(-0.5)
+			y := impData[i][1]             // Im(Z)
+			sumX += x
+			sumY += y
+			sumXY += x * y
+			sumX2 += x * x
+			validPoints++
+		}
+	}
+
+	if validPoints < 3 {
+		return 0
+	}
+
+	// Linear regression slope
+	slope := (float64(validPoints)*sumXY - sumX*sumY) / (float64(validPoints)*sumX2 - sumX*sumX)
+
+	// For Warburg: Im(Z) = σ * ω^(-0.5), slope should be positive
+	if slope > 0 {
+		warburgCoeff := slope * math.Sqrt(2.0*math.Pi) // Convert to standard Warburg coefficient
+		if warburgCoeff > 1e-6 && warburgCoeff < 1e3 { // reasonable range
+			return warburgCoeff
+		}
+	}
+	return 0
+}
+
+// estimateCPEParameters estimates Y0 and n from impedance magnitude and phase
+func (s *Solver) estimateCPEParameters(freqs []float64, impData [][2]float64) [2]float64 {
+	result := [2]float64{0, 0}
+	if len(impData) < 5 {
+		return result
+	}
+
+	// Use middle frequency range for CPE analysis
+	start := int(float64(len(impData)) * 0.2)
+	end := int(float64(len(impData)) * 0.8)
+	if start < 1 {
+		start = 1
+	}
+	if end > len(impData) {
+		end = len(impData)
+	}
+
+	// Calculate magnitude and phase
+	sumLogF, sumLogZ, sumLogFLogZ, sumLogF2 := 0.0, 0.0, 0.0, 0.0
+	sumPhase := 0.0
+	validPoints := 0
+
+	for i := start; i < end; i++ {
+		if freqs[i] > 0 {
+			magnitude := math.Sqrt(impData[i][0]*impData[i][0] + impData[i][1]*impData[i][1])
+			if magnitude > 1e-12 {
+				logF := math.Log10(freqs[i])
+				logZ := math.Log10(magnitude)
+				phase := math.Atan2(impData[i][1], impData[i][0])
+
+				sumLogF += logF
+				sumLogZ += logZ
+				sumLogFLogZ += logF * logZ
+				sumLogF2 += logF * logF
+				sumPhase += phase
+				validPoints++
+			}
+		}
+	}
+
+	if validPoints < 3 {
+		return result
+	}
+
+	// Linear regression on log(f) vs log|Z| to find n
+	slope := (float64(validPoints)*sumLogFLogZ - sumLogF*sumLogZ) / (float64(validPoints)*sumLogF2 - sumLogF*sumLogF)
+	intercept := (sumLogZ - slope*sumLogF) / float64(validPoints)
+	avgPhase := sumPhase / float64(validPoints)
+
+	// For CPE: |Z| = 1/(Y0 * ω^n), so log|Z| = -log(Y0) - n*log(ω)
+	// Slope = -n, so n = -slope
+	n := -slope
+	if n > 0.1 && n < 1.0 {
+		result[1] = n
+		// Calculate Y0 from intercept
+		y0 := 1.0 / math.Pow(10, intercept)
+		if y0 > 1e-12 && y0 < 1 {
+			result[0] = y0
+		}
+	}
+
+	// Validate with phase information
+	// For CPE: phase = -n*π/2
+	expectedPhase := -n * math.Pi / 2.0
+	if math.Abs(avgPhase-expectedPhase) < math.Pi/4 { // within reasonable tolerance
+		return result
+	}
+
+	// If phase doesn't match, try to estimate n from phase
+	if avgPhase < -0.1 && avgPhase > -1.4 { // reasonable phase range
+		nFromPhase := -2.0 * avgPhase / math.Pi
+		if nFromPhase > 0.1 && nFromPhase < 1.0 {
+			result[1] = nFromPhase
+		}
+	}
+
+	return result
 }

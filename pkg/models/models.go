@@ -8,10 +8,7 @@ import (
 
 // ImpedanceData represents incoming impedance measurement data
 type ImpedanceData struct {
-	Timestamp   string               `json:"timestamp"`
 	Frequencies []float64            `json:"frequencies"`
-	Magnitude   []float64            `json:"magnitude"`
-	Phase       []float64            `json:"phase"`
 	Impedance   []map[string]float64 `json:"impedance"`
 }
 
@@ -23,9 +20,8 @@ type BatchItem struct {
 
 // ImpedanceBatch represents a batch of impedance measurements
 type ImpedanceBatch struct {
-	BatchID   string      `json:"batch_id"`
-	Timestamp time.Time   `json:"timestamp"`
-	Spectra   []BatchItem `json:"spectra"`
+	BatchID *string     `json:"batch_id,omitempty"` // Optional - server will generate UUID if nil
+	Spectra []BatchItem `json:"spectra"`
 }
 
 // WorkItem represents a single EIS processing task
@@ -42,17 +38,20 @@ type WorkItem struct {
 
 // WorkResult contains the result of EIS processing
 type WorkResult struct {
-	ID             int
-	RequestID      string
-	BatchID        string
-	Iteration      int
-	Result         goimpcore.Result
-	ProcessingTime time.Duration
-	Success        bool
-	Freqs          []float64
-	RealImp        []float64
-	ImagImp        []float64
-	CircuitCode    string
+	ID                 int
+	RequestID          string
+	BatchID            string
+	Iteration          int
+	Result             goimpcore.Result
+	ProcessingTime     time.Duration
+	Success            bool
+	Freqs              []float64
+	RealImp            []float64
+	ImagImp            []float64
+	CircuitCode        string
+	OptimizationMethod string
+	// Generic parameters array - fits any equivalent circuit
+	Parameters []float64
 }
 
 // WebhookItem represents a webhook task
@@ -88,13 +87,16 @@ type WebhookResponse struct {
 	CircuitType        string             `json:"circuit_type"`
 }
 
-// SpectrumTiming tracks performance metrics for individual spectrum processing
-type SpectrumTiming struct {
-	Iteration      int           `json:"iteration"`
-	ProcessingTime time.Duration `json:"processing_time_ms"`
-	ChiSquare      float64       `json:"chi_square"`
-	Success        bool          `json:"success"`
-	CircuitCode    string        `json:"circuit_code"`
+// EISMetricsDataResult tracks performance metrics for individual spectrum processing
+type EISMetricsDataResult struct {
+	Iteration          int           `json:"iteration"`
+	ProcessingTime     time.Duration `json:"processing_time_ms"`
+	ChiSquare          float64       `json:"chi_square"`
+	Success            bool          `json:"success"`
+	CircuitCode        string        `json:"circuit_code"`
+	OptimizationMethod string        `json:"optimization_method"`
+	// Generic parameters array - fits any equivalent circuit
+	Parameters []float64 `json:"parameters"`
 }
 
 // BufferSet contains reusable buffers to reduce allocations

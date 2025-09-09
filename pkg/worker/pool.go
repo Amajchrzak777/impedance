@@ -8,18 +8,20 @@ import (
 	"github.com/kacperjurak/goimpcore"
 	"github.com/kacperjurak/goimpcore/pkg/config"
 	"github.com/kacperjurak/goimpcore/pkg/models"
+	"github.com/kacperjurak/goimpcore/pkg/webhook"
 )
 
 // Pool manages concurrent EIS processing workers
 type Pool struct {
-	jobs         chan models.WorkItem
-	results      chan models.WorkResult
-	webhookQueue chan models.WebhookItem
-	workers      int
-	bufferPool   sync.Pool
-	shutdown     chan struct{}
-	wg           sync.WaitGroup
-	processor    ProcessorFunc
+	jobs          chan models.WorkItem
+	results       chan models.WorkResult
+	webhookQueue  chan models.WebhookItem
+	workers       int
+	bufferPool    sync.Pool
+	shutdown      chan struct{}
+	wg            sync.WaitGroup
+	processor     ProcessorFunc
+	webhookClient *webhook.Client
 }
 
 // ProcessorFunc defines the signature for EIS data processing
@@ -27,8 +29,9 @@ type ProcessorFunc func(freqs []float64, impData [][2]float64, config *config.Co
 
 // Options holds configuration for creating a new worker pool
 type Options struct {
-	Workers   int
-	Processor ProcessorFunc
+	Workers       int
+	Processor     ProcessorFunc
+	WebhookClient *webhook.Client
 }
 
 // New creates a new worker pool with specified configuration
@@ -39,12 +42,13 @@ func New(opts Options) *Pool {
 
 	// do not block queueing new jobs, and results even if the workers are already busy jobs/results * 2
 	pool := &Pool{
-		jobs:         make(chan models.WorkItem, opts.Workers*2),
-		results:      make(chan models.WorkResult, opts.Workers*2),
-		webhookQueue: make(chan models.WebhookItem, opts.Workers*4), // 4x buffer for async webhooks - possibly slower operation, that's why extended buffer
-		workers:      opts.Workers,
-		shutdown:     make(chan struct{}),
-		processor:    opts.Processor,
+		jobs:          make(chan models.WorkItem, opts.Workers*2),
+		results:       make(chan models.WorkResult, opts.Workers*2),
+		webhookQueue:  make(chan models.WebhookItem, opts.Workers*4), // 4x buffer for async webhooks - possibly slower operation, that's why extended buffer
+		workers:       opts.Workers,
+		shutdown:      make(chan struct{}),
+		processor:     opts.Processor,
+		webhookClient: opts.WebhookClient,
 		bufferPool: sync.Pool{
 			New: func() interface{} {
 				// Enhanced buffer pooling with larger initial capacity
@@ -130,18 +134,27 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 		}
 	}
 
+	// Copy parameters for generic circuit support
+	var parameters []float64
+	if eisResult.Status == goimpcore.OK && len(eisResult.Params) > 0 {
+		parameters = make([]float64, len(eisResult.Params))
+		copy(parameters, eisResult.Params)
+	}
+
 	return models.WorkResult{
-		ID:             job.ID,
-		RequestID:      job.RequestID,
-		BatchID:        job.BatchID,
-		Iteration:      job.Iteration,
-		Result:         eisResult,
-		ProcessingTime: processingTime,
-		Success:        eisResult.Status == goimpcore.OK,
-		Freqs:          job.Freqs,
-		RealImp:        realCopy,
-		ImagImp:        imagCopy,
-		CircuitCode:    job.Config.(*config.Config).Code,
+		ID:                 job.ID,
+		RequestID:          job.RequestID,
+		BatchID:            job.BatchID,
+		Iteration:          job.Iteration,
+		Result:             eisResult,
+		ProcessingTime:     processingTime,
+		Success:            eisResult.Status == goimpcore.OK,
+		Freqs:              job.Freqs,
+		RealImp:            realCopy,
+		ImagImp:            imagCopy,
+		CircuitCode:        job.Config.(*config.Config).Code,
+		OptimizationMethod: job.Config.(*config.Config).OptimMethod,
+		Parameters:         parameters,
 	}
 }
 
@@ -188,10 +201,15 @@ func (p *Pool) webhookProcessor() {
 	}
 }
 
-// sendWebhook is a placeholder for webhook sending logic
+// sendWebhook sends webhook using the webhook client
 func (p *Pool) sendWebhook(webhook models.WebhookItem) {
-	// This will be moved to the webhook package
 	log.Printf("Processing webhook for %s", webhook.RequestID)
+
+	if err := p.webhookClient.Send(webhook); err != nil {
+		log.Printf("Failed to send webhook for %s: %v", webhook.RequestID, err)
+	} else {
+		log.Printf("✅ Webhook sent successfully for %s", webhook.RequestID)
+	}
 }
 
 // SubmitJob submits a job to the worker pool

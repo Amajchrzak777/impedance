@@ -3,22 +3,15 @@ package server
 import (
 	"fmt"
 	"log"
-	"math"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/kacperjurak/goimpcore"
+	"github.com/kacperjurak/goimpcore/internal/processing"
 	"github.com/kacperjurak/goimpcore/pkg/config"
 	"github.com/kacperjurak/goimpcore/pkg/handlers"
 	"github.com/kacperjurak/goimpcore/pkg/profiling"
 	"github.com/kacperjurak/goimpcore/pkg/webhook"
 	"github.com/kacperjurak/goimpcore/pkg/worker"
-)
-
-const (
-	minFunc       = 1.35e-2
-	maxIterations = 10
 )
 
 // Server represents the HTTP server with all dependencies
@@ -30,6 +23,7 @@ type Server struct {
 	httpServer    *http.Server
 	profiler      *profiling.Profiler
 	middleware    *profiling.Middleware
+	eisProcessor  *processing.EISProcessor
 }
 
 // ProcessorFunc defines the signature for EIS data processing
@@ -51,18 +45,22 @@ func New(opts Options) *Server {
 		opts.ServerConfig = config.DefaultServerConfig()
 	}
 
-	// Create worker pool
-	workerPool := worker.New(worker.Options{
-		Workers:   opts.ServerConfig.WorkerCount,
-		Processor: worker.ProcessorFunc(opts.Processor),
-	})
-
 	// Create webhook client
 	webhookClient := webhook.NewClient(opts.ServerConfig.WebhookURL, opts.Config)
+
+	// Create worker pool with webhook client
+	workerPool := worker.New(worker.Options{
+		Workers:       opts.ServerConfig.WorkerCount,
+		Processor:     worker.ProcessorFunc(opts.Processor),
+		WebhookClient: webhookClient,
+	})
 
 	// Create profiler and middleware
 	profiler := profiling.New(opts.ServerConfig)
 	middleware := profiling.NewMiddleware(opts.ServerConfig.EnableProfiling)
+
+	// Create EIS processor
+	eisProcessor := processing.NewEISProcessor()
 
 	// Create HTTP server
 	server := &Server{
@@ -72,6 +70,7 @@ func New(opts Options) *Server {
 		webhookClient: webhookClient,
 		profiler:      profiler,
 		middleware:    middleware,
+		eisProcessor:  eisProcessor,
 	}
 
 	server.setupRoutes()
@@ -105,158 +104,12 @@ func (s *Server) setupRoutes() {
 // getProcessorFunc returns the actual EIS processor function
 func (s *Server) getProcessorFunc() handlers.ProcessorFunc {
 	return func(freqs []float64, impData [][2]float64, cfg *config.Config) interface{} {
-		return s.processEISData(freqs, impData, cfg)
-	}
-}
-
-// processEISData performs actual EIS processing using goimpcore
-func (s *Server) processEISData(freqs []float64, impData [][2]float64, cfg *config.Config) goimpcore.Result {
-	log.Printf("🔥 DEBUG: processEISData called with %d frequencies, config: %+v", len(freqs), cfg)
-	log.Printf("🔥 DEBUG: Starting actual EIS processing...")
-
-	code := strings.ToLower(cfg.Code)
-
-	if cfg.OptimMethod == "all" {
-		return s.runAllOptimizationMethods(code, freqs, impData, cfg)
-	}
-
-	return s.runSingleOptimizationMethod(code, freqs, impData, cfg, cfg.OptimMethod)
-}
-
-func (s *Server) runSingleOptimizationMethod(code string, freqs []float64, impData [][2]float64, cfg *config.Config, method string) goimpcore.Result {
-	solver := goimpcore.NewSolver(code, freqs, impData)
-
-	// Use provided InitValues or generate automatic ones
-	if len(cfg.InitValues) > 0 {
-		solver.InitValues = []float64(cfg.InitValues)
-		log.Printf("Using provided initial values: %v", solver.InitValues)
-	} else {
-		solver.InitValues = s.generateInitialValues(code)
-		log.Printf("Using auto-generated initial values: %v", solver.InitValues)
-	}
-
-	if cfg.Unity {
-		solver.Weighting = goimpcore.UNITY
-	} else {
-		solver.Weighting = goimpcore.MODULUS
-	}
-
-	// Set the solver method based on the optimization method
-	switch method {
-	case "nelder-mead":
-		solver.SmartMode = "eis" // Use EIS smart mode for multi-try approach
-	case "levenberg-marquardt", "lm":
-		solver.SmartMode = "lm"
-	case "gradient-descent", "gd":
-		solver.SmartMode = "gd"
-	case "lbfgs":
-		solver.SmartMode = "lbfgs"
-	case "newton":
-		solver.SmartMode = "newton"
-	default:
-		log.Printf("Unknown optimization method '%s', using Nelder-Mead", method)
-		solver.SmartMode = "eis"
-	}
-
-	log.Printf("Using optimization method: %s", method)
-
-	// Time the optimization
-	startTime := time.Now()
-	res := solver.Solve(minFunc, maxIterations)
-	duration := time.Since(startTime)
-
-	// Ensure consistent chi-square calculation for all methods
-	// Skip recalculation for EIS mode as it handles scaling internally
-	if res.Status != "ERROR" && len(res.Params) > 0 && (res.MinUnit != "ChiSq" || method != "levenberg-marquardt") && cfg.SmartMode != "eis" {
-		// Debug the recalculation process
-		theoreticalImp := goimpcore.CircuitImpedance(code, freqs, res.Params)
-
-		actualChiSq := goimpcore.ChiSq(impData, theoreticalImp, solver.Weighting)
-		log.Printf("DEBUG: ChiSq calculation result: %v (weighting: %v)", actualChiSq, solver.Weighting)
-
-		// Check if recalculation produces NaN
-		if math.IsNaN(actualChiSq) || math.IsInf(actualChiSq, 0) {
-			log.Printf("WARNING: Recalculated chi-square is invalid (%v), keeping original result.Min (%v)", actualChiSq, res.Min)
-		} else {
-			log.Printf("INFO: Using recalculated chi-square (%v) instead of original (%v)", actualChiSq, res.Min)
-			res.Min = actualChiSq
-			res.MinUnit = "ChiSq"
+		result, err := s.eisProcessor.Process(freqs, impData, cfg)
+		if err != nil {
+			log.Printf("EIS processing error: %v", err)
+			return result // Return the error result from processor
 		}
-	} else if cfg.SmartMode == "eis" {
-		log.Printf("INFO: Skipping chi-square recalculation for EIS mode (scaling handled internally)")
-	}
-
-	if res.Status == "ERROR" {
-		log.Printf("EIS processing FAILED - Method: %s, Status: %s", method, res.Status)
-	} else {
-		log.Printf("EIS processing completed - Method: %s, Chi-square: %.14e", method, res.Min)
-	}
-
-	if !cfg.Quiet {
-		if res.Status == "ERROR" {
-			log.Printf("Method: %s FAILED - Status=%s", method, res.Status)
-		} else {
-			log.Printf("Method: %s, Min=%.12e, Params=%v, Status=%s", method, res.Min, res.Params, res.Status)
-		}
-	}
-
-	log.Printf("Processing time: %v", duration)
-	return res
-}
-
-func (s *Server) runAllOptimizationMethods(code string, freqs []float64, impData [][2]float64, cfg *config.Config) goimpcore.Result {
-	methods := []string{"nelder-mead", "levenberg-marquardt", "gradient-descent", "lbfgs", "newton"}
-	var bestResult goimpcore.Result
-	bestChiSq := math.Inf(1)
-
-	log.Printf("Running all optimization methods for comparison...")
-
-	for _, method := range methods {
-		log.Printf("Testing method: %s", method)
-		result := s.runSingleOptimizationMethod(code, freqs, impData, cfg, method)
-
-		if result.Status != "ERROR" && result.Min < bestChiSq {
-			bestResult = result
-			bestChiSq = result.Min
-			log.Printf("New best method: %s with chi-square: %.12e", method, result.Min)
-		}
-	}
-
-	if bestResult.Status == "" {
-		log.Printf("All methods failed")
-		return goimpcore.Result{
-			Status: "ERROR",
-			Min:    math.Inf(1),
-			Params: []float64{},
-		}
-	}
-
-	log.Printf("Best overall result: chi-square=%.12e", bestResult.Min)
-	return bestResult
-}
-
-// generateInitialValues creates reasonable default initial values for different circuit codes
-func (s *Server) generateInitialValues(code string) []float64 {
-	switch strings.ToLower(code) {
-	case "r(cr)":
-		// R1, C1, R2
-		return []float64{50.0, 1e-6, 100.0}
-	case "r(qr)":
-		// R1, Q1_Y0, Q1_n, R2
-		return []float64{50.0, 1e-6, 0.8, 100.0}
-	case "r(cr)(cr)":
-		// R1, C1, R2, C2, R3 (5 parameters)
-		return []float64{50.0, 1e-6, 100.0, 1e-6, 100.0}
-	case "r(q(r(qr)))":
-		// R1, Q1_Y0, Q1_n, R2, Q2_Y0, Q2_n, R3
-		return []float64{50.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0}
-	case "r(q(r(q(r(qr)))))":
-		// R1, Q1_Y0, Q1_n, R2, Q2_Y0, Q2_n, R3, Q3_Y0, Q3_n, R4
-		return []float64{50.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0}
-	default:
-		// Generic fallback: assume 4 parameters for R(QR) since that's our default
-		log.Printf("Warning: Unknown circuit code '%s', using R(QR) 4-parameter defaults", code)
-		return []float64{50.0, 1e-6, 0.8, 100.0}
+		return result
 	}
 }
 

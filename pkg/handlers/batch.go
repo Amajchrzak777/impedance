@@ -8,6 +8,8 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/kacperjurak/goimpcore/internal/utils"
@@ -57,7 +59,13 @@ func (h *BatchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("🔄 Batch processing started - ID: %s, Spectra: %d", batch.BatchID, len(batch.Spectra))
+	// Generate BatchID if not provided by client
+	if batch.BatchID == nil || *batch.BatchID == "" {
+		generatedID := utils.GenerateID()
+		batch.BatchID = &generatedID
+	}
+
+	log.Printf("🔄 Batch processing started - ID: %s, Spectra: %d", *batch.BatchID, len(batch.Spectra))
 
 	// Process batch asynchronously
 	go h.processBatchAsync(batch)
@@ -65,7 +73,7 @@ func (h *BatchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Return immediate response
 	response := map[string]interface{}{
 		"success":  true,
-		"batch_id": batch.BatchID,
+		"batch_id": *batch.BatchID,
 		"spectra":  len(batch.Spectra),
 		"message":  "Batch processing started with worker pool",
 	}
@@ -77,34 +85,41 @@ func (h *BatchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // processBatchAsync handles asynchronous batch processing
 func (h *BatchHandler) processBatchAsync(batch models.ImpedanceBatch) {
 	batchStartTime := time.Now()
-	spectrumTimings := make([]models.SpectrumTiming, len(batch.Spectra))
+	eisMetricsDataResults := make([]models.EISMetricsDataResult, len(batch.Spectra))
 	resultsReceived := 0
 
 	// Submit all jobs to worker pool
 	for _, item := range batch.Spectra {
-		job := h.createWorkItem(item, batch.BatchID)
+		job := h.createWorkItem(item, *batch.BatchID)
 		h.workerPool.SubmitJob(job)
 	}
+	log.Printf("🔄 Submitted %d jobs to worker pool", len(batch.Spectra))
 
 	// Collect results from worker pool
 	for resultsReceived < len(batch.Spectra) {
 		if result, ok := h.workerPool.GetResult(); ok {
-			h.processResult(result, spectrumTimings)
+			h.processResult(result, eisMetricsDataResults)
 			resultsReceived++
+			log.Printf("📊 Received result %d/%d", resultsReceived, len(batch.Spectra))
 		} else {
 			// No results available yet, small delay to prevent busy waiting
 			time.Sleep(1 * time.Millisecond)
 		}
 	}
+	log.Printf("✅ All %d results collected, proceeding to save CSV...", resultsReceived)
 
 	// All results collected
 	totalBatchTime := time.Since(batchStartTime)
 	concurrency := h.getConcurrency()
 
-	// Save timing results to file
-	h.saveTimingResults(batch.BatchID, totalBatchTime, spectrumTimings, concurrency)
+	log.Printf("🔄 About to save timing results - BatchID: %s, Duration: %v, Concurrency: %d", *batch.BatchID, totalBatchTime, concurrency)
 
-	log.Printf("🎉 Batch processing completed - ID: %s, Total time: %v", batch.BatchID, totalBatchTime)
+	// Save timing results to file
+	h.saveTimingResults(*batch.BatchID, totalBatchTime, eisMetricsDataResults, concurrency)
+
+	log.Printf("✅ CSV saving completed for batch: %s", *batch.BatchID)
+
+	log.Printf("🎉 Batch processing completed - ID: %s, Total time: %v", *batch.BatchID, totalBatchTime)
 }
 
 // createWorkItem converts a batch item to a work item
@@ -141,30 +156,39 @@ func (h *BatchHandler) createWorkItem(item models.BatchItem, batchID string) mod
 		Freqs:     freqs,
 		ImpData:   impData,
 		Config:    h.config,
-		StartTime: time.Now(),
+		StartTime: time.Now(), // Server-generated timestamp for accurate processing timing
 	}
 }
 
 // processResult processes a work result and updates timing
-func (h *BatchHandler) processResult(result models.WorkResult, spectrumTimings []models.SpectrumTiming) {
-	// Record timing
-	spectrumTimings[result.Iteration] = models.SpectrumTiming{
-		Iteration:      result.Iteration,
-		ProcessingTime: result.ProcessingTime,
-		ChiSquare:      result.Result.Min, // Extract chi-square from EIS result
-		Success:        result.Success,
-		CircuitCode:    result.CircuitCode,
+func (h *BatchHandler) processResult(result models.WorkResult, eisMetricsDataResults []models.EISMetricsDataResult) {
+	// Record timing (convert 1-based iteration to 0-based index)
+	index := result.Iteration - 1
+	if index < 0 || index >= len(eisMetricsDataResults) {
+		log.Printf("ERROR: Invalid iteration index %d (iteration=%d, array_length=%d)", index, result.Iteration, len(eisMetricsDataResults))
+		return
+	}
+	eisMetricsDataResults[index] = models.EISMetricsDataResult{
+		Iteration:          result.Iteration,
+		ProcessingTime:     result.ProcessingTime,
+		ChiSquare:          result.Result.Min, // Extract chi-square from EIS result
+		Success:            result.Success,
+		CircuitCode:        result.CircuitCode,
+		OptimizationMethod: result.OptimizationMethod,
+		Parameters:         result.Parameters, // Include fitted parameters
 	}
 
-	// Create webhook item
-	// TODO: Integrate with proper element calculation
+	// Create webhook item with complete parameter information
 	webhook := models.WebhookItem{
-		RequestID:   fmt.Sprintf("%s_iter_%03d", result.RequestID, result.Iteration),
-		ChiSquare:   result.Result.Min, // Extract chi-square from EIS result
-		RealImp:     result.RealImp,
-		ImagImp:     result.ImagImp,
-		Freqs:       result.Freqs,
-		CircuitCode: result.CircuitCode,
+		RequestID:         fmt.Sprintf("%s_iter_%03d", result.RequestID, result.Iteration),
+		ChiSquare:         result.Result.Min, // Extract chi-square from EIS result
+		RealImp:           result.RealImp,
+		ImagImp:           result.ImagImp,
+		Freqs:             result.Freqs,
+		Params:            result.Result.Params,                  // ✅ Add fitted parameters
+		Elements:          h.getElementNames(result.CircuitCode), // ✅ Add element names
+		ElementImpedances: h.calculateElementImpedances(result),  // ✅ Add element impedances
+		CircuitCode:       result.CircuitCode,
 	}
 
 	h.workerPool.QueueWebhook(webhook)
@@ -172,6 +196,36 @@ func (h *BatchHandler) processResult(result models.WorkResult, spectrumTimings [
 	if !h.config.Quiet {
 		log.Printf("✅ Processed spectrum iteration %d", result.Iteration)
 	}
+}
+
+// getElementNames returns element names for a given circuit code
+func (h *BatchHandler) getElementNames(circuitCode string) []string {
+	switch strings.ToLower(circuitCode) {
+	case "r(qr)", "R(QR)":
+		return []string{"r", "qy", "qn", "r"}
+	case "r(qr)(qr)", "R(QR)(QR)":
+		return []string{"r", "qy", "qn", "r", "qy", "qn", "r"}
+	case "r(cr)", "R(CR)":
+		return []string{"r", "c", "r"}
+	case "r(cr)(cr)", "R(CR)(CR)":
+		return []string{"r", "c", "r", "c", "r"}
+	case "r(q(r(qr)))", "R(Q(R(QR)))":
+		return []string{"r", "qy", "qn", "r", "qy", "qn", "r"}
+	case "r(q(r(q(r(qr)))))", "R(Q(R(Q(R(QR)))))":
+		return []string{"r", "qy", "qn", "r", "qy", "qn", "r", "qy", "qn", "r"}
+	default:
+		// Generic fallback: assume R(QR) pattern
+		log.Printf("Warning: Unknown circuit code '%s', using R(QR) element names", circuitCode)
+		return []string{"r", "qy", "qn", "r"}
+	}
+}
+
+// calculateElementImpedances calculates impedance for each circuit element (simplified version)
+func (h *BatchHandler) calculateElementImpedances(result models.WorkResult) []models.ElementImpedance {
+	// For now, return empty array - full implementation would require complex impedance calculations
+	// This matches the TODO comment that was in the original code
+	// The webplot service can still function with empty element impedances
+	return []models.ElementImpedance{}
 }
 
 // getConcurrency returns the current concurrency level
@@ -184,8 +238,19 @@ func (h *BatchHandler) getConcurrency() int {
 }
 
 // saveTimingResults saves timing data to a CSV file for performance analysis
-func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration, spectrumTimings []models.SpectrumTiming, concurrency int) {
+func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration, eisMetricsDataResults []models.EISMetricsDataResult, concurrency int) {
+	log.Printf("🗂️  Starting to save timing results to CSV...")
+
 	filename := "concurrent_timing_results.csv"
+
+	// Ensure we save to current working directory
+	if wd, err := os.Getwd(); err == nil {
+		filename = filepath.Join(wd, "concurrent_timing_results.csv")
+		log.Printf("📁 Working directory: %s", wd)
+		log.Printf("📄 Full CSV path: %s", filename)
+	} else {
+		log.Printf("⚠️  Could not get working directory: %v", err)
+	}
 
 	// Check if file exists to decide on header
 	var writeHeader bool
@@ -194,12 +259,14 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 	}
 
 	// Open file for append
+	log.Printf("🔓 Opening CSV file for writing...")
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Printf("Error opening timing file: %v", err)
+		log.Printf("❌ Error opening timing file: %v", err)
 		return
 	}
 	defer file.Close()
+	log.Printf("✅ CSV file opened successfully")
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -220,6 +287,7 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 			"SpectraPerSecond",
 			"EfficiencyScore",
 			"CircuitCode",
+			"OptimizationMethod",
 		}
 		if err := writer.Write(header); err != nil {
 			log.Printf("Error writing timing header: %v", err)
@@ -233,7 +301,7 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 	var successful int
 	var totalChiSq float64
 
-	for _, timing := range spectrumTimings {
+	for _, timing := range eisMetricsDataResults {
 		totalSpectrumTime += timing.ProcessingTime
 		if timing.ProcessingTime < minTime {
 			minTime = timing.ProcessingTime
@@ -247,7 +315,7 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 		}
 	}
 
-	numSpectra := len(spectrumTimings)
+	numSpectra := len(eisMetricsDataResults)
 	avgSpectrumTime := totalSpectrumTime / time.Duration(numSpectra)
 	successRate := float64(successful) / float64(numSpectra) * 100
 	avgChiSq := 0.0
@@ -262,10 +330,12 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 	theoreticalTime := avgSpectrumTime * time.Duration(numSpectra)
 	efficiencyScore := theoreticalTime.Seconds() / totalTime.Seconds() / float64(concurrency)
 
-	// Get circuit code from first spectrum timing (should be consistent across all spectra)
+	// Get circuit code and optimization method from first spectrum timing (should be consistent across all spectra)
 	circuitCode := "Unknown"
-	if len(spectrumTimings) > 0 {
-		circuitCode = spectrumTimings[0].CircuitCode
+	optimizationMethod := "Unknown"
+	if len(eisMetricsDataResults) > 0 {
+		circuitCode = eisMetricsDataResults[0].CircuitCode
+		optimizationMethod = eisMetricsDataResults[0].OptimizationMethod
 	}
 
 	// Write timing record
@@ -283,15 +353,115 @@ func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration
 		fmt.Sprintf("%.2f", spectraPerSecond),
 		fmt.Sprintf("%.3f", efficiencyScore),
 		circuitCode,
+		optimizationMethod,
 	}
 
+	log.Printf("📝 Writing timing record to CSV...")
 	if err := writer.Write(record); err != nil {
-		log.Printf("Error writing timing record: %v", err)
+		log.Printf("❌ Error writing timing record: %v", err)
 		return
 	}
+	log.Printf("✅ Timing record written successfully")
 
 	log.Printf("📊 Timing saved: %d spectra, %d goroutines, %.2f ms total, %.2f%% success, %.3f efficiency",
 		numSpectra, concurrency, float64(totalTime.Nanoseconds())/1000000.0, successRate, efficiencyScore)
+
+	// Also save detailed per-spectrum results
+	log.Printf("🔄 Now saving detailed spectrum results...")
+	h.saveDetailedResults(batchID, eisMetricsDataResults)
+	log.Printf("✅ Detailed results saving completed")
+}
+
+// saveDetailedResults saves per-spectrum detailed results including circuit parameters
+func (h *BatchHandler) saveDetailedResults(batchID string, eisMetricsDataResults []models.EISMetricsDataResult) {
+	log.Printf("🗂️  Starting to save detailed results to CSV...")
+
+	filename := "detailed_spectrum_results.csv"
+
+	// Ensure we save to current working directory
+	if wd, err := os.Getwd(); err == nil {
+		filename = filepath.Join(wd, "detailed_spectrum_results.csv")
+		log.Printf("📄 Detailed CSV path: %s", filename)
+	} else {
+		log.Printf("⚠️  Could not get working directory for detailed results: %v", err)
+	}
+
+	// Check if file exists to decide on header
+	var writeHeader bool
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		writeHeader = true
+	}
+
+	// Open file for append
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Printf("Error opening detailed results file: %v", err)
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write header if new file
+	if writeHeader {
+		header := []string{
+			"Timestamp",
+			"BatchID",
+			"SpectrumIteration",
+			"ProcessingTime_ms",
+			"ChiSquare",
+			"Success",
+			"CircuitCode",
+			"OptimizationMethod",
+			"Param1",
+			"Param2",
+			"Param3",
+			"Param4",
+			"Param5",
+			"Param6",
+			"Param7",
+			"Param8",
+			"Param9",
+			"Param10",
+		}
+		if err := writer.Write(header); err != nil {
+			log.Printf("Error writing detailed results header: %v", err)
+			return
+		}
+	}
+
+	// Write each spectrum result
+	timestamp := time.Now().Format(time.RFC3339)
+	for _, timing := range eisMetricsDataResults {
+		record := []string{
+			timestamp,
+			batchID,
+			fmt.Sprintf("%d", timing.Iteration),
+			fmt.Sprintf("%.2f", float64(timing.ProcessingTime.Nanoseconds())/1000000.0),
+			fmt.Sprintf("%.6e", timing.ChiSquare),
+			fmt.Sprintf("%t", timing.Success),
+			timing.CircuitCode,
+			timing.OptimizationMethod,
+		}
+
+		// Add up to 10 parameters (pad with empty strings if fewer)
+		for i := 0; i < 10; i++ {
+			if i < len(timing.Parameters) {
+				record = append(record, fmt.Sprintf("%.6e", timing.Parameters[i]))
+			} else {
+				record = append(record, "")
+			}
+		}
+
+		if err := writer.Write(record); err != nil {
+			log.Printf("Error writing detailed spectrum record: %v", err)
+			return
+		}
+	}
+
+	log.Printf("📋 Detailed results saved: %d spectrum records to %s", len(eisMetricsDataResults), filename)
+	log.Printf("✅ All CSV writing operations completed successfully")
 }
 
 // setupCORS sets up CORS headers

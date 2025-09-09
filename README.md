@@ -20,5 +20,9 @@ cd lib
 gcc -o test test.c ./clib.so
 ```
 
+```
+cd /Users/adammajchrzak/ghq/github.com/adam/masterapp/goimpcore && ./manual_test.sh
+```
+
 ## Resources
 https://www.bio-logic.net/wp-content/uploads/Zdiffusion.pdf

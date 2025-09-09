@@ -34,12 +34,14 @@ def convert_csv_to_batch(csv_file, batch_id="csv-batch-001"):
     for spectrum_num in spectra_data:
         spectra_data[spectrum_num].sort(key=lambda x: x['frequency'])
     
-    # Create batch JSON structure
+    # Create batch JSON structure (let server generate batch_id unless explicitly provided)
     batch = {
-        "batch_id": batch_id,
-        "timestamp": datetime.now().isoformat() + "Z",
         "spectra": []
     }
+    
+    # Only include batch_id if explicitly provided and not default
+    if batch_id and batch_id != "csv-batch-001":
+        batch["batch_id"] = batch_id
     
     # Convert each spectrum to the required format
     for spectrum_num in sorted(spectra_data.keys()):
@@ -52,10 +54,7 @@ def convert_csv_to_batch(csv_file, batch_id="csv-batch-001"):
         spectrum_entry = {
             "iteration": spectrum_num - 1,  # Convert to 0-based indexing
             "impedance_data": {
-                "timestamp": datetime.now().isoformat() + "Z",
                 "frequencies": frequencies,
-                "magnitude": [],  # Not provided in CSV, but part of schema
-                "phase": [],     # Not provided in CSV, but part of schema  
                 "impedance": impedances
             }
         }
@@ -77,7 +76,8 @@ def main():
         
         # Print statistics
         print(f"Converted CSV to batch JSON:", file=sys.stderr)
-        print(f"  Batch ID: {batch_data['batch_id']}", file=sys.stderr)
+        batch_id_info = batch_data.get('batch_id', 'server-generated')
+        print(f"  Batch ID: {batch_id_info}", file=sys.stderr)
         print(f"  Spectra: {len(batch_data['spectra'])}", file=sys.stderr)
         if batch_data['spectra']:
             print(f"  Frequencies per spectrum: {len(batch_data['spectra'][0]['impedance_data']['frequencies'])}", file=sys.stderr)

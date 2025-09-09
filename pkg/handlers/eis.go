@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kacperjurak/goimpcore"
 	"github.com/kacperjurak/goimpcore/internal/utils"
 	"github.com/kacperjurak/goimpcore/pkg/config"
 	"github.com/kacperjurak/goimpcore/pkg/models"
@@ -58,22 +59,61 @@ func (h *EISHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Generate unique ID for this request
 	requestID := utils.GenerateID()
 
-	// Process data asynchronously
-	go h.processAsync(requestID, impedanceData)
-
-	// Return immediate response
-	response := map[string]interface{}{
-		"success":    true,
-		"request_id": requestID,
-		"message":    "Processing started",
-	}
+	// Process data synchronously to return results immediately
+	result := h.processSync(requestID, impedanceData)
 
 	if !h.config.Quiet {
 		log.Printf("HTTP Request received - ID: %s, Data points: %d", requestID, len(impedanceData.Frequencies))
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}
+
+// processSync handles synchronous processing of EIS data and returns results
+func (h *EISHandler) processSync(requestID string, impedanceData models.ImpedanceData) map[string]interface{} {
+	// Convert ImpedanceData to internal format
+	freqs := impedanceData.Frequencies
+	impData := make([][2]float64, len(impedanceData.Impedance))
+
+	for i, point := range impedanceData.Impedance {
+		impData[i] = [2]float64{point["real"], point["imag"]}
+	}
+
+	// Process EIS data
+	result := h.processor(freqs, impData, h.config)
+
+	// Create response with fitted parameters
+	response := map[string]interface{}{
+		"success":      true,
+		"request_id":   requestID,
+		"message":      "Processing completed",
+		"circuit_code": h.config.Code,
+		"data_points":  len(freqs),
+	}
+
+	// Add results based on the actual result type
+	if eisResult, ok := result.(goimpcore.Result); ok {
+		response["chi_square"] = eisResult.Min
+		response["status"] = eisResult.Status
+		response["parameters"] = eisResult.Params
+		response["optimization_method"] = h.config.OptimMethod
+		response["smart_mode"] = h.config.SmartMode
+
+		// For R(QR) circuit, add parameter names for clarity
+		if h.config.Code == "R(QR)" && len(eisResult.Params) >= 4 {
+			response["fitted_parameters"] = map[string]interface{}{
+				"R1":   eisResult.Params[0],
+				"Q_Y0": eisResult.Params[1],
+				"Q_n":  eisResult.Params[2],
+				"R2":   eisResult.Params[3],
+			}
+		}
+	} else {
+		response["error"] = "Invalid result type"
+	}
+
+	return response
 }
 
 // processAsync handles asynchronous processing of EIS data

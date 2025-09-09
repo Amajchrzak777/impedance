@@ -4,7 +4,6 @@ import (
 	"math"
 	"math/cmplx"
 	"math/rand"
-	"time"
 )
 
 type mode int
@@ -77,26 +76,6 @@ func CircuitImpedance(code string, freqs []float64, values []float64) [][2]float
 		res = append(res, tmpSlc)
 	}
 	return res
-}
-
-func CircuitImpedanceNoisy(code string, freqs []float64, values []float64, noisyPoints uint, noiseLevel float64, littleNoise bool) [][2]float64 {
-	rand.Seed(time.Now().Unix())
-	c := CircuitImpedance(code, freqs, values)
-
-	if littleNoise {
-		for i, v := range c {
-			noise(&v, 0.01)
-			c[i] = v
-		}
-	}
-
-	// set random noisy points
-	for i := uint(0); i < noisyPoints; i++ {
-		index := rand.Intn(len(c))
-		noise(&c[index], noiseLevel)
-	}
-
-	return c
 }
 
 func changeMode(mode *mode) {

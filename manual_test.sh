@@ -1,8 +1,20 @@
 #!/bin/bash
 
-# Manual test script to verify concurrent processing with real data
+# Enhanced manual test script for optimization method comparison
+# Usage: ./manual_test.sh [optimization_method] [workers] [circuit]
+# Example: ./manual_test.sh nelder-mead 10 R(QR)
+#          ./manual_test.sh levenberg-marquardt 12 R(CR)
+#          ./manual_test.sh all 10 R(QR)  # Tests both methods
 
-echo "=== Manual Concurrent Processing Test ==="
+OPTIMIZATION_METHOD=${1:-"nelder-mead"}
+CIRCUIT=${2:-"R(QR)"}
+WORKERS=${3:-"10"}
+WORKERS_SPECIFIED=$3
+
+echo "=== Enhanced EIS Optimization Comparison Test ==="
+echo "🔧 Optimization Method: $OPTIMIZATION_METHOD"
+echo "🧵 Workers: $WORKERS"
+echo "⚡ Circuit: $CIRCUIT"
 echo
 
 # Kill any existing servers
@@ -70,23 +82,7 @@ create_test_batch() {
             echo -n "${frequencies[j]}" >> test_batch.json
         done
         echo '],' >> test_batch.json
-        
-        # Add dummy magnitude and phase arrays (calculated from impedance)
-        echo -n '                "magnitude": [' >> test_batch.json
-        for ((j=0; j<${#real_parts[@]}; j++)); do
-            if [ $j -gt 0 ]; then echo -n ', ' >> test_batch.json; fi
-            local mag=$(echo "sqrt(${real_parts[j]}*${real_parts[j]} + ${imag_parts[j]}*${imag_parts[j]})" | bc -l 2>/dev/null || echo "1")
-            printf "%.4f" "$mag" >> test_batch.json
-        done
-        echo '],' >> test_batch.json
-        
-        echo -n '                "phase": [' >> test_batch.json  
-        for ((j=0; j<${#real_parts[@]}; j++)); do
-            if [ $j -gt 0 ]; then echo -n ', ' >> test_batch.json; fi
-            local phase=$(echo "atan2(${imag_parts[j]}, ${real_parts[j]}) * 180 / 3.14159" | bc -l 2>/dev/null || echo "0")
-            printf "%.4f" "$phase" >> test_batch.json
-        done
-        echo '],' >> test_batch.json
+
         
         # Add impedance array
         echo '                "impedance": [' >> test_batch.json
@@ -111,16 +107,16 @@ create_test_batch() {
     echo "✅ Test batch created with 12 spectra from real CSV files"
 }
 
-# Test different concurrency levels
+# Test different concurrency levels with specific optimization method
 test_concurrency_manual() {
     local threads=$1
+    local opt_method=$2
     
-    echo "🧵 Testing with $threads goroutines (12 spectra)..."
+    echo "🧵 Testing with $threads goroutines (12 spectra) using $opt_method..."
     
-    # Start server
-    echo "📡 Starting server..."
-#    ./goimpsolver -http -threads=$threads -q &
-    ./goimpsolver-restructured -server -threads=$threads -quiet &
+    # Start server with optimization method and circuit as CLI parameters
+    echo "📡 Starting server with method: $opt_method, circuit: $CIRCUIT..."
+    ./goimpsolver-restructured -server -threads=$threads -quiet -method="$opt_method" -circuit="$CIRCUIT" &
     SERVER_PID=$!
     
     # Wait for server to start
@@ -174,11 +170,34 @@ test_concurrency_manual() {
     echo
 }
 
+# Run all tests for a specific optimization method
+run_method_tests() {
+    local method=$1
+    echo "🔬 Testing optimization method: $method with circuit: $CIRCUIT"
+    echo "============================================"
+    
+    # Test with different worker counts
+    if [ -n "$WORKERS_SPECIFIED" ]; then
+        # If worker count was passed as second argument, only test that
+        echo "Testing with specific worker count: $WORKERS"
+        test_concurrency_manual "$WORKERS" "$method"
+    else
+        # Default: test all worker counts: 1, 5, 10, 12 threads
+        echo "Testing with all worker counts: 1, 5, 10, 12 threads"
+        test_concurrency_manual 3 "$method"
+        test_concurrency_manual 5 "$method"
+        test_concurrency_manual 10 "$method"
+        test_concurrency_manual 12 "$method"
+    fi
+    
+    echo "✅ Completed tests for $method"
+    echo
+}
+
 # Main execution
 main() {
     echo "Building server..."
     go build -o goimpsolver-restructured
-#    go build -o goimpsolver
 
     if [ ! -f "./goimpsolver-restructured" ]; then
         echo "❌ Failed to build server"
@@ -192,20 +211,42 @@ main() {
     create_test_batch
     echo
     
-    # Test only 12 workers to verify fix
-    test_concurrency_manual 10
-    test_concurrency_manual 12
+    # Run tests based on optimization method parameter
+    case "$OPTIMIZATION_METHOD" in
+        "all")
+            echo "🎯 Running comprehensive comparison tests..."
+            run_method_tests "nelder-mead"
+            run_method_tests "levenberg-marquardt"
+            ;;
+        *)
+            echo "🎯 Running tests for $OPTIMIZATION_METHOD..."
+            run_method_tests "$OPTIMIZATION_METHOD"
+            ;;
+    esac
 
-    echo "=== Manual Test Complete ==="
+    echo "=== Enhanced Test Complete ==="
     
-    # Show results
+    # Show batch summary results
     if [ -f "concurrent_timing_results.csv" ]; then
-        echo "📊 Latest results:"
-        tail -n 4 concurrent_timing_results.csv | column -t -s ','
+        echo "📊 Batch Summary Results (latest entries):"
+        tail -n 6 concurrent_timing_results.csv | column -t -s ','
+        echo
+    fi
+    
+    # Show detailed spectrum results
+    if [ -f "detailed_spectrum_results.csv" ]; then
+        echo "📋 Detailed Spectrum Results (sample):"
+        echo "Circuit parameters for each spectrum:"
+        tail -n 5 detailed_spectrum_results.csv | column -t -s ','
+        echo
     fi
     
     # Cleanup
     rm -f test_batch.json
+    
+    echo "💾 Results saved to:"
+    echo "   - concurrent_timing_results.csv (batch summary)"
+    echo "   - detailed_spectrum_results.csv (per-spectrum parameters)"
 }
 
 main "$@"

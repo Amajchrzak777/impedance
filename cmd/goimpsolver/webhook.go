@@ -166,7 +166,7 @@ func sendWebhook(requestID string, chiSquare float64, realImp []float64, imagImp
 
 	// Debug: Log a sample of the JSON payload to verify CircuitType is included
 	if !globalConfig.Quiet {
-		log.Printf("DEBUG: Webhook JSON sample - CircuitType: %s, ElementNames: %v", 
+		log.Printf("DEBUG: Webhook JSON sample - CircuitType: %s, ElementNames: %v",
 			webhookData.CircuitType, webhookData.ElementNames)
 	}
 

@@ -1,11 +1,9 @@
 {
   "batch_id": "profiling-test-csv-data",
-  "timestamp": "2025-08-21T22:10:00Z",
   "spectra": [
     {
       "iteration": 0,
       "impedance_data": {
-        "timestamp": "2025-08-21T22:10:00Z",
         "frequencies": [45007, 28351, 19889, 10103, 6311, 3967, 2521, 1571, 1009, 631],
         "impedance": [
           {"real": 27.606, "imag": -16.670},
@@ -24,7 +22,6 @@
     {
       "iteration": 1,
       "impedance_data": {
-        "timestamp": "2025-08-21T22:10:01Z",
         "frequencies": [45007, 28351, 19889, 10103, 6311, 3967, 2521, 1571, 1009, 631],
         "impedance": [
           {"real": 27.606, "imag": -16.670},
@@ -43,7 +40,6 @@
     {
       "iteration": 2,
       "impedance_data": {
-        "timestamp": "2025-08-21T22:10:02Z",
         "frequencies": [45007, 28351, 19889, 10103, 6311, 3967, 2521, 1571, 1009, 631],
         "impedance": [
           {"real": 27.606, "imag": -16.670},

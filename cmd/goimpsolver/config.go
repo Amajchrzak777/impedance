@@ -48,7 +48,5 @@ type Config struct {
 type ImpedanceData struct {
 	Timestamp   string               `json:"timestamp"`
 	Frequencies []float64            `json:"frequencies"`
-	Magnitude   []float64            `json:"magnitude"`
-	Phase       []float64            `json:"phase"`
 	Impedance   []map[string]float64 `json:"impedance"`
 }
