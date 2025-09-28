@@ -11,8 +11,8 @@ import (
 	"github.com/kacperjurak/goimpcore/pkg/webhook"
 )
 
-// Pool manages concurrent EIS processing workers
-type Pool struct {
+// FixedPool is a deadlock-free version of the worker pool
+type FixedPool struct {
 	jobs          chan models.WorkItem
 	results       chan models.WorkResult
 	webhookQueue  chan models.WebhookItem
@@ -22,30 +22,25 @@ type Pool struct {
 	wg            sync.WaitGroup
 	processor     ProcessorFunc
 	webhookClient *webhook.Client
+
+	// Deadlock prevention: metrics and monitoring
+	droppedResults  int64
+	droppedWebhooks int64
+	metricsLock     sync.RWMutex
 }
 
-// ProcessorFunc defines the signature for EIS data processing
-type ProcessorFunc func(freqs []float64, impData [][2]float64, config *config.Config) interface{}
-
-// Options holds configuration for creating a new worker pool
-type Options struct {
-	Workers       int
-	Processor     ProcessorFunc
-	WebhookClient *webhook.Client
-}
-
-// New creates a new worker pool with specified configuration
-func New(opts Options) *Pool {
+// NewFixed creates a deadlock-free worker pool
+func NewFixed(opts Options) *FixedPool {
 	if opts.Workers <= 0 {
 		opts.Workers = 5
 	}
 
-	// Large queue sizes to handle batch processing without deadlock
-	jobQueueSize := 200     // Large buffer for jobs to handle 100+ batches
-	resultQueueSize := 200  // Large buffer for results to prevent worker blocking
-	webhookQueueSize := 200 // Large buffer for webhooks
+	// Conservative queue sizes to prevent memory issues
+	jobQueueSize := opts.Workers * 2     // Smaller job buffer
+	resultQueueSize := opts.Workers * 3  // Moderate result buffer
+	webhookQueueSize := opts.Workers * 4 // Larger webhook buffer
 
-	pool := &Pool{
+	pool := &FixedPool{
 		jobs:          make(chan models.WorkItem, jobQueueSize),
 		results:       make(chan models.WorkResult, resultQueueSize),
 		webhookQueue:  make(chan models.WebhookItem, webhookQueueSize),
@@ -55,8 +50,6 @@ func New(opts Options) *Pool {
 		webhookClient: opts.WebhookClient,
 		bufferPool: sync.Pool{
 			New: func() interface{} {
-				// Enhanced buffer pooling with larger initial capacity
-				// Based on typical EIS data sizes (10-1000 frequency points)
 				return &models.BufferSet{
 					Real: make([]float64, 0, 200),
 					Imag: make([]float64, 0, 200),
@@ -70,25 +63,25 @@ func New(opts Options) *Pool {
 	return pool
 }
 
-// start initializes and starts all workers
-func (p *Pool) start() {
+// start initializes workers with deadlock prevention
+func (p *FixedPool) start() {
 	// Start processing workers
 	for i := 0; i < p.workers; i++ {
 		p.wg.Add(1)
-		go p.worker(i)
+		go p.workerFixed(i)
 	}
 
 	// Start webhook processor
 	p.wg.Add(1)
 	go p.webhookProcessor()
 
-	log.Printf("🔧 Worker pool started with %d workers", p.workers)
-	log.Printf("📊 Queue sizes - Jobs: %d, Results: %d, Webhooks: %d",
+	log.Printf("🔧 Fixed worker pool started with %d workers", p.workers)
+	log.Printf("📊 Conservative queue sizes - Jobs: %d, Results: %d, Webhooks: %d",
 		cap(p.jobs), cap(p.results), cap(p.webhookQueue))
 }
 
-// worker processes EIS jobs from the jobs channel
-func (p *Pool) worker(id int) {
+// workerFixed is the deadlock-free worker implementation
+func (p *FixedPool) workerFixed(id int) {
 	defer p.wg.Done()
 
 	for {
@@ -96,9 +89,20 @@ func (p *Pool) worker(id int) {
 		case job := <-p.jobs:
 			result := p.processJob(job)
 
-			// DRAINAGE FIX: Block until result can be sent - don't drop results
-			// The new drainage system will keep the results queue empty
-			p.results <- result
+			// DEADLOCK FIX: Non-blocking result write with timeout
+			select {
+			case p.results <- result:
+				// Result sent successfully
+			case <-time.After(100 * time.Millisecond):
+				// Result channel full, drop with warning
+				p.metricsLock.Lock()
+				p.droppedResults++
+				dropped := p.droppedResults
+				p.metricsLock.Unlock()
+
+				log.Printf("⚠️ Worker %d: Result queue full, dropped result for job %d (total dropped: %d)",
+					id, job.Iteration, dropped)
+			}
 
 		case <-p.shutdown:
 			return
@@ -106,8 +110,8 @@ func (p *Pool) worker(id int) {
 	}
 }
 
-// processJob handles the actual EIS processing with buffer reuse
-func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
+// processJob is the same as original but with enhanced logging
+func (p *FixedPool) processJob(job models.WorkItem) models.WorkResult {
 	// Get buffer from pool
 	buffers := p.bufferPool.Get().(*models.BufferSet)
 	defer p.bufferPool.Put(buffers)
@@ -118,10 +122,8 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 
 	// Process EIS data
 	startTime := time.Now()
-	log.Printf("DEBUG: About to call processor with %d frequencies, config: %+v", len(job.Freqs), job.Config.(*config.Config))
 	result := p.processor(job.Freqs, job.ImpData, job.Config.(*config.Config))
 	processingTime := time.Since(startTime)
-	log.Printf("DEBUG: Processor returned result type: %T, value: %+v", result, result)
 
 	// Extract impedance data with pre-allocated buffers
 	p.extractImpedanceData(job.ImpData, buffers)
@@ -135,7 +137,6 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 	// Type assert result to goimpcore.Result
 	eisResult, ok := result.(goimpcore.Result)
 	if !ok {
-		// Fallback for invalid result
 		eisResult = goimpcore.Result{
 			Status: "ERROR",
 			Min:    0.0,
@@ -143,7 +144,7 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 		}
 	}
 
-	// Copy parameters for generic circuit support
+	// Copy parameters
 	var parameters []float64
 	if eisResult.Status == goimpcore.OK && len(eisResult.Params) > 0 {
 		parameters = make([]float64, len(eisResult.Params))
@@ -167,18 +168,14 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 	}
 }
 
-// extractImpedanceData extracts real and imaginary parts from impedance data
-// Enhanced for better memory efficiency and reduced allocations
-func (p *Pool) extractImpedanceData(impData [][2]float64, buffers *models.BufferSet) {
+// extractImpedanceData is same as original
+func (p *FixedPool) extractImpedanceData(impData [][2]float64, buffers *models.BufferSet) {
 	dataLen := len(impData)
 
-	// Only reallocate if current capacity is significantly smaller
-	// This reduces frequent reallocations for varying data sizes
 	if cap(buffers.Real) < dataLen {
-		// Allocate with some extra capacity to handle size variations
-		newCap := dataLen + (dataLen >> 2) // +25% extra capacity
+		newCap := dataLen + (dataLen >> 2)
 		if newCap < 200 {
-			newCap = 200 // Minimum reasonable capacity
+			newCap = 200
 		}
 		buffers.Real = make([]float64, dataLen, newCap)
 		buffers.Imag = make([]float64, dataLen, newCap)
@@ -187,21 +184,20 @@ func (p *Pool) extractImpedanceData(impData [][2]float64, buffers *models.Buffer
 		buffers.Imag = buffers.Imag[:dataLen]
 	}
 
-	// Use range-based loop for better performance
 	for i, imp := range impData {
 		buffers.Real[i] = imp[0]
 		buffers.Imag[i] = imp[1]
 	}
 }
 
-// webhookProcessor handles webhook requests asynchronously
-func (p *Pool) webhookProcessor() {
+// webhookProcessor with deadlock prevention
+func (p *FixedPool) webhookProcessor() {
 	defer p.wg.Done()
 
 	for {
 		select {
 		case webhook := <-p.webhookQueue:
-			// Process webhook asynchronously without blocking workers
+			// Process webhook asynchronously without blocking
 			go p.sendWebhook(webhook)
 
 		case <-p.shutdown:
@@ -210,30 +206,34 @@ func (p *Pool) webhookProcessor() {
 	}
 }
 
-// sendWebhook sends webhook using the webhook client
-func (p *Pool) sendWebhook(webhook models.WebhookItem) {
-	log.Printf("Processing webhook for %s", webhook.RequestID)
-
+// sendWebhook same as original
+func (p *FixedPool) sendWebhook(webhook models.WebhookItem) {
 	if err := p.webhookClient.Send(webhook); err != nil {
 		log.Printf("Failed to send webhook for %s: %v", webhook.RequestID, err)
-	} else {
-		log.Printf("✅ Webhook sent successfully for %s", webhook.RequestID)
 	}
 }
 
-// SubmitJob submits a job to the worker pool
-func (p *Pool) SubmitJob(job models.WorkItem) {
+// SubmitJob with enhanced monitoring
+func (p *FixedPool) SubmitJob(job models.WorkItem) {
 	select {
 	case p.jobs <- job:
 		// Job submitted successfully
 	default:
-		log.Printf("⚠️  Worker pool jobs channel full, job may be delayed")
-		p.jobs <- job // Block until space available
+		// DEADLOCK PREVENTION: Log but don't block indefinitely
+		log.Printf("⚠️ Job queue full, blocking for job %d", job.Iteration)
+
+		// Block with timeout to prevent infinite blocking
+		select {
+		case p.jobs <- job:
+			log.Printf("✅ Job %d submitted after delay", job.Iteration)
+		case <-time.After(5 * time.Second):
+			log.Printf("❌ Job %d submission timeout - system overloaded", job.Iteration)
+		}
 	}
 }
 
-// GetResult retrieves a result from the worker pool (non-blocking)
-func (p *Pool) GetResult() (models.WorkResult, bool) {
+// GetResult enhanced with metrics
+func (p *FixedPool) GetResult() (models.WorkResult, bool) {
 	select {
 	case result := <-p.results:
 		return result, true
@@ -242,27 +242,55 @@ func (p *Pool) GetResult() (models.WorkResult, bool) {
 	}
 }
 
-// QueueWebhook queues a webhook for async processing
-func (p *Pool) QueueWebhook(webhook models.WebhookItem) {
+// GetResultWithTimeout provides blocking read with timeout
+func (p *FixedPool) GetResultWithTimeout(timeout time.Duration) (models.WorkResult, bool) {
 	select {
-	case p.webhookQueue <- webhook:
-		// Webhook queued successfully
-	case <-time.After(50 * time.Millisecond):
-		// DEADLOCK FIX: Drop webhook with timeout instead of immediate drop
-		log.Printf("⚠️ Webhook queue full, dropping webhook for %s after timeout", webhook.RequestID)
+	case result := <-p.results:
+		return result, true
+	case <-time.After(timeout):
+		return models.WorkResult{}, false
 	}
 }
 
-// SendWebhookDirect sends webhook directly without queuing to avoid buffer overflow
-func (p *Pool) SendWebhookDirect(webhook models.WebhookItem) error {
-	log.Printf("Sending webhook directly for %s", webhook.RequestID)
-	return p.webhookClient.Send(webhook)
+// QueueWebhook with deadlock prevention
+func (p *FixedPool) QueueWebhook(webhook models.WebhookItem) {
+	select {
+	case p.webhookQueue <- webhook:
+		// Webhook queued successfully
+	default:
+		// DEADLOCK FIX: Drop webhook instead of blocking
+		p.metricsLock.Lock()
+		p.droppedWebhooks++
+		dropped := p.droppedWebhooks
+		p.metricsLock.Unlock()
+
+		log.Printf("⚠️ Webhook queue full, dropping webhook for %s (total dropped: %d)",
+			webhook.RequestID, dropped)
+	}
+}
+
+// GetMetrics returns pool performance metrics
+func (p *FixedPool) GetMetrics() (droppedResults, droppedWebhooks int64) {
+	p.metricsLock.RLock()
+	defer p.metricsLock.RUnlock()
+	return p.droppedResults, p.droppedWebhooks
 }
 
 // Shutdown gracefully shuts down the worker pool
-func (p *Pool) Shutdown() {
-	log.Printf("🛑 Shutting down worker pool...")
+func (p *FixedPool) Shutdown() {
+	log.Printf("🛑 Shutting down fixed worker pool...")
+
+	p.metricsLock.RLock()
+	droppedResults := p.droppedResults
+	droppedWebhooks := p.droppedWebhooks
+	p.metricsLock.RUnlock()
+
+	if droppedResults > 0 || droppedWebhooks > 0 {
+		log.Printf("📊 Final metrics - Dropped results: %d, Dropped webhooks: %d",
+			droppedResults, droppedWebhooks)
+	}
+
 	close(p.shutdown)
 	p.wg.Wait()
-	log.Printf("✅ Worker pool shutdown complete")
+	log.Printf("✅ Fixed worker pool shutdown complete")
 }

@@ -1,7 +1,9 @@
 package config
 
 import (
+	"net"
 	"strconv"
+	"time"
 )
 
 // ArrayFlags replacement for removed goimp/cmd.ArrayFlags
@@ -71,12 +73,31 @@ func DefaultConfig() *Config {
 
 // DefaultServerConfig returns server configuration with sensible defaults
 func DefaultServerConfig() *ServerConfig {
+	webhookURL := getWebhookURL()
 	return &ServerConfig{
 		Port:            "8080",
 		WorkerCount:     5,
-		WebhookURL:      "http://webplot:3001/webhook",
+		WebhookURL:      webhookURL,
 		EnableMetrics:   true,
 		EnableProfiling: false,
 		ProfilingPort:   "6060",
 	}
+}
+
+// getWebhookURL determines the correct webhook URL based on environment
+func getWebhookURL() string {
+	// Check if we're running in Docker by looking for the webplot hostname
+	// In Docker, container names resolve as hostnames
+	// Outside Docker, use localhost
+
+	// Try to resolve webplot hostname - if it fails, we're running locally
+	conn, err := net.DialTimeout("tcp", "webplot:3001", 1*time.Second)
+	if err == nil {
+		// webplot hostname is reachable, we're in Docker
+		conn.Close()
+		return "http://webplot:3001/webhook"
+	}
+
+	// webplot hostname not reachable, use localhost
+	return "http://localhost:3001/webhook"
 }

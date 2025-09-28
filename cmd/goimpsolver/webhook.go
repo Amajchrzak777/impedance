@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const webhookURL = "http://webplot:3001/webhook"
+const webhookURL = "http://localhost:3001/webhook"
 
 type ElementImpedance struct {
 	Name       string               `json:"name"`

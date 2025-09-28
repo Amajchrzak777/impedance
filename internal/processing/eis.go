@@ -150,6 +150,9 @@ func (p *EISProcessor) generateInitialValues(code string) []float64 {
 	case "r(q(r(q(r(qr)))))":
 		// R1, Q1_Y0, Q1_n, R2, Q2_Y0, Q2_n, R3, Q3_Y0, Q3_n, R4
 		return []float64{50.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0, 1e-6, 0.8, 100.0}
+	case "r(rc(r(cr)))":
+		// R1, R2, C1, R3, C2, R4 (6 parameters for R(RC(R(CR))))
+		return []float64{50.0, 100.0, 1e-6, 100.0, 1e-6, 100.0}
 	default:
 		// Generic fallback: assume 4 parameters for R(QR) since that's our default
 		log.Printf("Warning: Unknown circuit code '%s', using R(QR) 4-parameter defaults", code)

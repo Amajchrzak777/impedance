@@ -1,6 +1,7 @@
 package goimpcore
 
 import (
+	"context"
 	"fmt"
 	"github.com/maorshutman/lm"
 	"gonum.org/v1/gonum/optimize"
@@ -8,6 +9,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"time"
 )
 
 type Weighting int
@@ -125,7 +127,42 @@ func (s *Solver) baseNMSolve() Result {
 		Concurrent:        10000,
 	}
 
-	res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.NelderMead{})
+	// Add timeout to prevent hanging optimization
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Channel to capture the result
+	type optimizeResult struct {
+		result *optimize.Result
+		err    error
+	}
+	resultChan := make(chan optimizeResult, 1)
+
+	// Run optimization in goroutine with timeout
+	go func() {
+		res, err := optimize.Minimize(problem, s.InitValues, settings, &optimize.NelderMead{})
+		resultChan <- optimizeResult{result: res, err: err}
+	}()
+
+	// Wait for either completion or timeout
+	var res *optimize.Result
+	var err error
+	select {
+	case result := <-resultChan:
+		res = result.result
+		err = result.err
+	case <-ctx.Done():
+		log.Printf("Nelder-Mead optimization timed out after 30 seconds")
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 30.0,
+			Status:  "TIMEOUT",
+			Payload: nil,
+		}
+	}
+
 	if err != nil {
 		log.Printf("Nelder-Mead optimization failed: %v", err)
 		return Result{
@@ -247,8 +284,8 @@ func (s *Solver) baseLMSolve() Result {
 
 	// Debug: Log final parameters after optimization
 	log.Printf("LM DEBUG: Final params: %v", res.X)
-	log.Printf("LM DEBUG: Iterations used: %d", res.Iterations)
-	log.Printf("LM DEBUG: Converged: %v", res.Converged)
+	// log.Printf("LM DEBUG: Iterations used: %d", res.Iterations)  // Field not available
+	// log.Printf("LM DEBUG: Converged: %v", res.Converged)        // Field not available
 
 	finalChiSq := ChiSq(s.Observed, CircuitImpedance(s.code, s.Freqs, res.X), s.Weighting)
 	log.Printf("LM DEBUG: Final ChiSq: %.6e", finalChiSq)
@@ -259,13 +296,17 @@ func (s *Solver) baseLMSolve() Result {
 		MinUnit: "ChiSq",
 		Runtime: 0,
 		Status:  OK,
-		Iters:   res.Iterations,
+		Iters:   0, // res.Iterations not available in this LM library version
 		Payload: nil,
 	}
 }
 
 func (s *Solver) eisSolve(minFunc float64, maxIterations int) Result {
 	log.Println("EIS Solve Mode")
+
+	// Add overall timeout for the entire EIS solve process
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
 
 	// normalizes the input impedance data so that it is in the range [0, 1]
 	scaleCoef := prepareData(&s.Observed)
@@ -288,6 +329,29 @@ func (s *Solver) eisSolve(minFunc float64, maxIterations int) Result {
 	log.Println("elements:", elements)
 
 	for iterations < maxIterations {
+		// Check for timeout
+		select {
+		case <-ctx.Done():
+			log.Printf("EIS optimization timed out after 60 seconds at iteration %d", iterations)
+			if bestRes.Min != math.Inf(1) {
+				// Return best result found so far
+				scaleParams(&bestRes.Params, elements, scaleCoef)
+				scaleData(&s.Observed, scaleCoef)
+				bestRes.Status = "TIMEOUT"
+				return bestRes
+			}
+			return Result{
+				Params:  []float64{},
+				Min:     math.Inf(1),
+				MinUnit: "ChiSq",
+				Runtime: 60.0,
+				Status:  "TIMEOUT",
+				Payload: nil,
+			}
+		default:
+			// Continue with optimization
+		}
+
 		res := s.baseNMSolve()
 		log.Println("init:", s.InitValues)
 		log.Println("resl:", res)

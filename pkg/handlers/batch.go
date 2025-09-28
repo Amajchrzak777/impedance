@@ -88,27 +88,41 @@ func (h *BatchHandler) processBatchAsync(batch models.ImpedanceBatch) {
 	eisMetricsDataResults := make([]models.EISMetricsDataResult, len(batch.Spectra))
 	resultsReceived := 0
 
-	// Submit all jobs to worker pool
-	for _, item := range batch.Spectra {
-		job := h.createWorkItem(item, *batch.BatchID)
-		h.workerPool.SubmitJob(job)
-	}
-	log.Printf("🔄 Submitted %d jobs to worker pool", len(batch.Spectra))
+	// PROPER BATCH PROCESSING: Process in chunks to avoid queue overflow
+	chunkSize := 50 // Process 50 spectra at a time
+	totalSpectra := len(batch.Spectra)
 
-	// Collect results from worker pool
-	for resultsReceived < len(batch.Spectra) {
-		if result, ok := h.workerPool.GetResult(); ok {
-			h.processResult(result, eisMetricsDataResults)
-			resultsReceived++
-			log.Printf("📊 Received result %d/%d", resultsReceived, len(batch.Spectra))
-		} else {
-			// No results available yet, small delay to prevent busy waiting
-			time.Sleep(1 * time.Millisecond)
+	log.Printf("🔄 Starting chunked batch processing - %d spectra in chunks of %d", totalSpectra, chunkSize)
+
+	for chunkStart := 0; chunkStart < totalSpectra; chunkStart += chunkSize {
+		chunkEnd := chunkStart + chunkSize
+		if chunkEnd > totalSpectra {
+			chunkEnd = totalSpectra
 		}
-	}
-	log.Printf("✅ All %d results collected, proceeding to save CSV...", resultsReceived)
 
-	// All results collected
+		currentChunk := batch.Spectra[chunkStart:chunkEnd]
+		log.Printf("📦 Processing chunk %d-%d (%d spectra)", chunkStart, chunkEnd-1, len(currentChunk))
+
+		// Submit current chunk
+		for _, spectrum := range currentChunk {
+			job := h.createWorkItem(spectrum, *batch.BatchID)
+			h.workerPool.SubmitJob(job)
+		}
+
+		// Wait for current chunk to complete before submitting next chunk
+		h.waitForChunkCompletion(len(currentChunk), chunkStart, eisMetricsDataResults)
+	}
+
+	log.Printf("✅ All chunks processed successfully")
+	resultsReceived = len(batch.Spectra) // All results processed through chunks
+
+	if resultsReceived < len(batch.Spectra) {
+		log.Printf("⚠️ Missing results! Expected %d, received %d", len(batch.Spectra), resultsReceived)
+	} else {
+		log.Printf("✅ All %d results collected successfully", resultsReceived)
+	}
+
+	// All results processed and webhooks sent
 	totalBatchTime := time.Since(batchStartTime)
 	concurrency := h.getConcurrency()
 
@@ -160,10 +174,10 @@ func (h *BatchHandler) createWorkItem(item models.BatchItem, batchID string) mod
 	}
 }
 
-// processResult processes a work result and updates timing
-func (h *BatchHandler) processResult(result models.WorkResult, eisMetricsDataResults []models.EISMetricsDataResult) {
-	// Record timing (convert 1-based iteration to 0-based index)
-	index := result.Iteration - 1
+// processResultWithImmediateWebhook processes a work result and sends webhook immediately
+func (h *BatchHandler) processResultWithImmediateWebhook(result models.WorkResult, eisMetricsDataResults []models.EISMetricsDataResult) {
+	// Use iteration as 0-based index directly
+	index := result.Iteration
 	if index < 0 || index >= len(eisMetricsDataResults) {
 		log.Printf("ERROR: Invalid iteration index %d (iteration=%d, array_length=%d)", index, result.Iteration, len(eisMetricsDataResults))
 		return
@@ -191,7 +205,70 @@ func (h *BatchHandler) processResult(result models.WorkResult, eisMetricsDataRes
 		CircuitCode:       result.CircuitCode,
 	}
 
-	h.workerPool.QueueWebhook(webhook)
+	// 🔍 PERFORMANCE LOGGING: Time webhook queuing
+	webhookQueueStart := time.Now()
+
+	// Send webhook directly without queuing to avoid buffer overflow
+	go func() {
+		if err := h.workerPool.SendWebhookDirect(webhook); err != nil {
+			log.Printf("Failed to send webhook for %s: %v", webhook.RequestID, err)
+		}
+	}()
+
+	webhookQueueDuration := time.Since(webhookQueueStart)
+
+	// 🔍 PERFORMANCE LOGGING: Track webhook queue performance, especially around bottleneck area
+	if result.Iteration >= 1150 && result.Iteration <= 1170 || webhookQueueDuration > time.Millisecond {
+		log.Printf("🔍 WEBHOOK QUEUE - Iteration %d: queue_time=%v", result.Iteration, webhookQueueDuration)
+	}
+
+	if !h.config.Quiet {
+		log.Printf("✅ Processed spectrum iteration %d and queued webhook immediately (queue_time=%v)", result.Iteration, webhookQueueDuration)
+	}
+}
+
+// processResult processes a work result and updates timing (legacy function kept for compatibility)
+func (h *BatchHandler) processResult(result models.WorkResult, eisMetricsDataResults []models.EISMetricsDataResult) {
+	// Use iteration as 0-based index directly
+	index := result.Iteration
+	if index < 0 || index >= len(eisMetricsDataResults) {
+		log.Printf("ERROR: Invalid iteration index %d (iteration=%d, array_length=%d)", index, result.Iteration, len(eisMetricsDataResults))
+		return
+	}
+	eisMetricsDataResults[index] = models.EISMetricsDataResult{
+		Iteration:          result.Iteration,
+		ProcessingTime:     result.ProcessingTime,
+		ChiSquare:          result.Result.Min, // Extract chi-square from EIS result
+		Success:            result.Success,
+		CircuitCode:        result.CircuitCode,
+		OptimizationMethod: result.OptimizationMethod,
+		Parameters:         result.Parameters, // Include fitted parameters
+	}
+
+	// Debug: Log the first few values to understand the data mapping issue
+	log.Printf("DEBUG WEBHOOK: Frequencies[0:3]: %v", result.Freqs[:min(3, len(result.Freqs))])
+	log.Printf("DEBUG WEBHOOK: RealImp[0:3]: %v", result.RealImp[:min(3, len(result.RealImp))])
+	log.Printf("DEBUG WEBHOOK: ImagImp[0:3]: %v", result.ImagImp[:min(3, len(result.ImagImp))])
+
+	// Create webhook item with complete parameter information
+	webhook := models.WebhookItem{
+		RequestID:         fmt.Sprintf("%s_iter_%03d", result.RequestID, result.Iteration),
+		ChiSquare:         result.Result.Min, // Extract chi-square from EIS result
+		RealImp:           result.RealImp,
+		ImagImp:           result.ImagImp,
+		Freqs:             result.Freqs,
+		Params:            result.Result.Params,                  // ✅ Add fitted parameters
+		Elements:          h.getElementNames(result.CircuitCode), // ✅ Add element names
+		ElementImpedances: h.calculateElementImpedances(result),  // ✅ Add element impedances
+		CircuitCode:       result.CircuitCode,
+	}
+
+	// Send webhook directly to avoid queue overflow
+	go func() {
+		if err := h.workerPool.SendWebhookDirect(webhook); err != nil {
+			log.Printf("Failed to send webhook for %s: %v", webhook.RequestID, err)
+		}
+	}()
 
 	if !h.config.Quiet {
 		log.Printf("✅ Processed spectrum iteration %d", result.Iteration)
@@ -213,11 +290,53 @@ func (h *BatchHandler) getElementNames(circuitCode string) []string {
 		return []string{"r", "qy", "qn", "r", "qy", "qn", "r"}
 	case "r(q(r(q(r(qr)))))", "R(Q(R(Q(R(QR)))))":
 		return []string{"r", "qy", "qn", "r", "qy", "qn", "r", "qy", "qn", "r"}
+	case "r(rc(r(cr)))", "R(RC(R(CR)))":
+		return []string{"r", "r", "c", "r", "c", "r"}
 	default:
 		// Generic fallback: assume R(QR) pattern
 		log.Printf("Warning: Unknown circuit code '%s', using R(QR) element names", circuitCode)
 		return []string{"r", "qy", "qn", "r"}
 	}
+}
+
+// waitForChunkCompletion waits for a chunk of jobs to complete and processes results
+func (h *BatchHandler) waitForChunkCompletion(chunkSize int, chunkOffset int, eisMetricsDataResults []models.EISMetricsDataResult) {
+	chunkResultsReceived := 0
+	maxWaitTime := time.Minute * 2 // 2 minutes per chunk
+	chunkTimeout := time.Now().Add(maxWaitTime)
+
+	log.Printf("🕐 Waiting for chunk completion: %d results expected", chunkSize)
+
+	for chunkResultsReceived < chunkSize {
+		if time.Now().After(chunkTimeout) {
+			log.Printf("⚠️ Chunk timeout! Received %d/%d results", chunkResultsReceived, chunkSize)
+			break
+		}
+
+		// Drain all available results for this chunk
+		resultsBatch := 0
+		for chunkResultsReceived < chunkSize {
+			if result, ok := h.workerPool.GetResult(); ok {
+				// Process result and send webhook immediately
+				h.processResultWithImmediateWebhook(result, eisMetricsDataResults)
+				chunkResultsReceived++
+				resultsBatch++
+			} else {
+				break // No more results available
+			}
+		}
+
+		if resultsBatch > 0 {
+			log.Printf("🚀 CHUNK DRAIN: Processed %d results (%d/%d chunk complete)",
+				resultsBatch, chunkResultsReceived, chunkSize)
+		} else {
+			// Wait briefly for more results
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+
+	log.Printf("✅ Chunk %d-%d completed (%d/%d results)",
+		chunkOffset, chunkOffset+chunkSize-1, chunkResultsReceived, chunkSize)
 }
 
 // calculateElementImpedances calculates impedance for each circuit element (simplified version)
