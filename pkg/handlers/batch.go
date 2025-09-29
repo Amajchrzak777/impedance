@@ -348,11 +348,11 @@ func (h *BatchHandler) getConcurrency() int {
 func (h *BatchHandler) saveTimingResults(batchID string, totalTime time.Duration, eisMetricsDataResults []models.EISMetricsDataResult, concurrency int) {
 	log.Printf("🗂️  Starting to save timing results to CSV...")
 
-	filename := "concurrent_timing_results.csv"
+	filename := "concurrent_timing_resultsx.csv"
 
 	// Ensure we save to current working directory
 	if wd, err := os.Getwd(); err == nil {
-		filename = filepath.Join(wd, "concurrent_timing_results.csv")
+		filename = filepath.Join(wd, "concurrent_timing_resultsx.csv")
 		log.Printf("📁 Working directory: %s", wd)
 		log.Printf("📄 Full CSV path: %s", filename)
 	} else {

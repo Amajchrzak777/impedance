@@ -182,7 +182,7 @@ main() {
     # Show results
     if [ -f "concurrent_timing_results.csv" ]; then
         echo "📊 Latest Results:"
-        tail -n 8 concurrent_timing_results.csv | column -t -s ','
+        tail -n 8 concurrent_timing_resultsx.csv | column -t -s ','
     fi
     
     # Cleanup

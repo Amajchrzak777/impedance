@@ -229,7 +229,7 @@ main() {
     # Show batch summary results
     if [ -f "concurrent_timing_results.csv" ]; then
         echo "📊 Batch Summary Results (latest entries):"
-        tail -n 6 concurrent_timing_results.csv | column -t -s ','
+        tail -n 6 concurrent_timing_resultsx.csv | column -t -s ','
         echo
     fi
     

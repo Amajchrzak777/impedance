@@ -503,7 +503,7 @@ func handleBatchEISData(w http.ResponseWriter, r *http.Request) {
 
 // saveConcurrentTimingResults saves timing data to a CSV file for performance analysis
 func saveConcurrentTimingResults(batchID string, totalTime time.Duration, eisMetricsDataResults []EISMetricsDataResult, concurrency int) {
-	filename := "concurrent_timing_results.csv"
+	filename := "concurrent_timing_resultsx.csv"
 
 	// Check if file exists to decide on header
 	var writeHeader bool

@@ -244,7 +244,7 @@ main() {
     # Show results if file exists
     if [ -f "concurrent_timing_results.csv" ]; then
         echo "📊 Latest results:"
-        tail -n ${#WORKER_ARRAY[@]} concurrent_timing_results.csv | column -t -s ','
+        tail -n ${#WORKER_ARRAY[@]} concurrent_timing_resultsx.csv | column -t -s ','
     fi
 }
 
