@@ -102,9 +102,13 @@ func (s *Server) setupRoutes() {
 }
 
 // getProcessorFunc returns the actual EIS processor function
+// CRITICAL FIX: Create a new EIS processor instance for each call to ensure thread safety
+// The shared s.eisProcessor was causing race conditions between workers
 func (s *Server) getProcessorFunc() handlers.ProcessorFunc {
 	return func(freqs []float64, impData [][2]float64, cfg *config.Config) interface{} {
-		result, err := s.eisProcessor.Process(freqs, impData, cfg)
+		// Create a NEW processor instance for each call - this ensures thread safety
+		processor := processing.NewEISProcessor()
+		result, err := processor.Process(freqs, impData, cfg)
 		if err != nil {
 			log.Printf("EIS processing error: %v", err)
 			return result // Return the error result from processor

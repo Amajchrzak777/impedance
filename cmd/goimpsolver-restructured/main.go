@@ -23,7 +23,7 @@ func main() {
 	serverConfig := &config.ServerConfig{
 		Port:            "8080",
 		WorkerCount:     int(cfg.Threads),
-		WebhookURL:      "http://webplot:3001/webhook",
+		WebhookURL:      "http://localhost:3001/webhook",
 		EnableMetrics:   true,
 		EnableProfiling: cfg.EnableProfiling,
 		ProfilingPort:   "6060",

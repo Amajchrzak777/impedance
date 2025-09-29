@@ -40,10 +40,21 @@ func New(opts Options) *Pool {
 		opts.Workers = 5
 	}
 
-	// Large queue sizes to handle batch processing without deadlock
-	jobQueueSize := 200     // Large buffer for jobs to handle 100+ batches
-	resultQueueSize := 200  // Large buffer for results to prevent worker blocking
-	webhookQueueSize := 200 // Large buffer for webhooks
+	// Dynamic queue sizes that scale with worker count to prevent contention
+	jobQueueSize := opts.Workers * 20     // 20 jobs per worker buffer
+	resultQueueSize := opts.Workers * 20  // 20 results per worker buffer
+	webhookQueueSize := opts.Workers * 10 // 10 webhooks per worker buffer
+
+	// Minimum sizes for small worker counts
+	if jobQueueSize < 100 {
+		jobQueueSize = 100
+	}
+	if resultQueueSize < 100 {
+		resultQueueSize = 100
+	}
+	if webhookQueueSize < 50 {
+		webhookQueueSize = 50
+	}
 
 	pool := &Pool{
 		jobs:          make(chan models.WorkItem, jobQueueSize),

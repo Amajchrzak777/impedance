@@ -91,6 +91,23 @@ func (s *Solver) Solve(minFunc float64, maxIterations int) Result {
 	}
 }
 
+// SolveStateless is a thread-safe version that does not modify the receiver
+// This can be used for concurrent processing without race conditions
+func (s *Solver) SolveStateless(minFunc float64, maxIterations int) Result {
+	if s == nil {
+		return Result{}
+	}
+
+	switch s.SmartMode {
+	case "eis":
+		return s.eisSolveStateless(minFunc, maxIterations)
+	case "lm":
+		return s.lmSolveStateless(minFunc, maxIterations)
+	default:
+		return s.baseNMSolveStateless()
+	}
+}
+
 // How Simplex works http://195.134.76.37/applets/AppletSimplex/Appl_Simplex2.html
 func (s *Solver) baseNMSolve() Result {
 	log.Println("base NM Solve Mode")
@@ -918,4 +935,601 @@ func (s *Solver) estimateCPEParameters(freqs []float64, impData [][2]float64) [2
 	}
 
 	return result
+}
+
+// =============================================================================
+// STATELESS/THREAD-SAFE SOLVER METHODS
+// These methods do not modify the receiver and work with local copies
+// =============================================================================
+
+// baseNMSolveStateless is a thread-safe version that works with local copies
+func (s *Solver) baseNMSolveStateless() Result {
+	log.Println("Stateless base NM Solve Mode")
+
+	// Work with local copy of InitValues to avoid race conditions
+	localInitValues := make([]float64, len(s.InitValues))
+	copy(localInitValues, s.InitValues)
+
+	// Check if InitValues is empty or nil
+	if len(localInitValues) == 0 {
+		log.Printf("ERROR: No initial values provided for optimization")
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
+
+	log.Printf("Using initial values: %v", localInitValues)
+
+	// Create local problem function that captures solver data immutably
+	localFreqs := make([]float64, len(s.Freqs))
+	copy(localFreqs, s.Freqs)
+	localObserved := make([][2]float64, len(s.Observed))
+	copy(localObserved, s.Observed)
+	localCode := s.code
+	localWeighting := s.Weighting
+
+	problemFunc := func(x []float64) float64 {
+		calculated := CircuitImpedance(localCode, localFreqs, x)
+		chiSq := ChiSq(localObserved, calculated, localWeighting)
+
+		// Add penalty for Qn parameters outside [0.1, 1.0]
+		penalty := 0.0
+		elements := GetElements(localCode)
+		for i, elem := range elements {
+			if elem == "qn" && i < len(x) {
+				if x[i] < 0.1 {
+					penalty += 1e6 * math.Pow(0.1-x[i], 2)
+				} else if x[i] > 1.0 {
+					penalty += 1e6 * math.Pow(x[i]-1.0, 2)
+				}
+			}
+		}
+		return chiSq + penalty
+	}
+
+	problem := optimize.Problem{
+		Func: problemFunc,
+	}
+
+	settings := &optimize.Settings{
+		InitValues:        nil,
+		GradientThreshold: 0,
+		Converger:         nil,
+		MajorIterations:   0,
+		Runtime:           0,
+		FuncEvaluations:   0,
+		GradEvaluations:   0,
+		HessEvaluations:   0,
+		Recorder:          nil,
+		Concurrent:        10000,
+	}
+
+	// Add timeout to prevent hanging optimization
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Channel to capture the result
+	type optimizeResult struct {
+		result *optimize.Result
+		err    error
+	}
+	resultChan := make(chan optimizeResult, 1)
+
+	// Run optimization in goroutine with timeout
+	go func() {
+		res, err := optimize.Minimize(problem, localInitValues, settings, &optimize.NelderMead{})
+		resultChan <- optimizeResult{result: res, err: err}
+	}()
+
+	// Wait for either completion or timeout
+	var res *optimize.Result
+	var err error
+	select {
+	case result := <-resultChan:
+		res = result.result
+		err = result.err
+	case <-ctx.Done():
+		log.Printf("Stateless Nelder-Mead optimization timed out after 30 seconds")
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 30.0,
+			Status:  "TIMEOUT",
+			Payload: nil,
+		}
+	}
+
+	if err != nil {
+		log.Printf("Stateless Nelder-Mead optimization failed: %v", err)
+		return Result{
+			Params:  []float64{},
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
+
+	payload := map[string]interface{}{
+		"majorIterations": res.MajorIterations,
+		"funcEvaluations": res.FuncEvaluations,
+	}
+
+	return Result{
+		Code:    localCode,
+		Params:  res.X,
+		Min:     res.F,
+		MinUnit: "ChiSq",
+		Payload: payload,
+		Runtime: float64(res.Runtime / 1000),
+		Status:  OK,
+	}
+}
+
+// eisSolveStateless is a thread-safe version that works with local copies
+func (s *Solver) eisSolveStateless(minFunc float64, maxIterations int) Result {
+	log.Println("Stateless EIS Solve Mode")
+
+	// Add overall timeout for the entire EIS solve process
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	// Work with local copies to avoid race conditions
+	localObserved := make([][2]float64, len(s.Observed))
+	copy(localObserved, s.Observed)
+
+	localInitValues := make([]float64, len(s.InitValues))
+	copy(localInitValues, s.InitValues)
+
+	localFreqs := make([]float64, len(s.Freqs))
+	copy(localFreqs, s.Freqs)
+
+	// normalizes the input impedance data so that it is in the range [0, 1]
+	scaleCoef := prepareDataLocal(&localObserved)
+
+	if len(localInitValues) == 0 {
+		localInitValues = s.findInitValuesLocal(localFreqs, localObserved)
+	}
+
+	fmt.Println("Stateless InitValues:", localInitValues)
+
+	var (
+		lastMin    = math.Inf(1)
+		lastValues = make([]float64, len(localInitValues))
+		bestRes    = Result{Min: math.Inf(1)}
+	)
+
+	primaryValues := make([]float64, len(localInitValues))
+	copy(primaryValues, localInitValues)
+	iterations := 0
+	elements := GetElements(s.code)
+	log.Println("elements:", elements)
+
+	for iterations < maxIterations {
+		// Check for timeout
+		select {
+		case <-ctx.Done():
+			log.Printf("Stateless EIS optimization timed out after 60 seconds at iteration %d", iterations)
+			if bestRes.Min != math.Inf(1) {
+				// Return best result found so far
+				scaleParams(&bestRes.Params, elements, scaleCoef)
+				scaleDataLocal(&localObserved, scaleCoef)
+				bestRes.Status = "TIMEOUT"
+				return bestRes
+			}
+			return Result{
+				Params:  []float64{},
+				Min:     math.Inf(1),
+				MinUnit: "ChiSq",
+				Runtime: 60.0,
+				Status:  "TIMEOUT",
+				Payload: nil,
+			}
+		default:
+			// Continue with optimization
+		}
+
+		// Create a temporary solver with current values for this iteration
+		tempSolver := &Solver{
+			code:       s.code,
+			Freqs:      localFreqs,
+			Observed:   localObserved,
+			InitValues: localInitValues,
+			SmartMode:  s.SmartMode,
+			Weighting:  s.Weighting,
+		}
+
+		res := tempSolver.baseNMSolveStateless()
+		log.Println("stateless init:", localInitValues)
+		log.Println("stateless resl:", res)
+
+		if res.Min < bestRes.Min {
+			bestRes = res
+		}
+
+		log.Println("stateless iter:", iterations, "res:", res.Min, "bestRes", bestRes.Min)
+
+		if res.Min < minFunc {
+			break
+		} else {
+			localInitValues = modifyParams(res.Params, res.Min > lastMin, primaryValues, lastValues, elements)
+		}
+		lastMin = res.Min
+		copy(lastValues, res.Params)
+		iterations++
+	}
+
+	scaleParams(&bestRes.Params, elements, scaleCoef)
+	scaleDataLocal(&localObserved, scaleCoef)
+
+	return bestRes
+}
+
+// lmSolveStateless is a thread-safe version that works with local copies
+func (s *Solver) lmSolveStateless(minFunc float64, maxIterations int) Result {
+	log.Println("Stateless LM Solve Mode")
+
+	// Work with local copies to avoid race conditions
+	localInitValues := make([]float64, len(s.InitValues))
+	copy(localInitValues, s.InitValues)
+
+	localFreqs := make([]float64, len(s.Freqs))
+	copy(localFreqs, s.Freqs)
+
+	localObserved := make([][2]float64, len(s.Observed))
+	copy(localObserved, s.Observed)
+
+	if len(localInitValues) == 0 {
+		localInitValues = s.findInitValuesLocal(localFreqs, localObserved)
+	}
+
+	var (
+		lastMin    = math.Inf(1)
+		lastValues = make([]float64, len(localInitValues))
+		bestRes    = Result{Min: math.Inf(1)}
+	)
+
+	primaryInitValues := make([]float64, len(localInitValues))
+	copy(primaryInitValues, localInitValues)
+	iterations := 0
+
+	for iterations < maxIterations {
+		// Create a temporary solver with current values for this iteration
+		tempSolver := &Solver{
+			code:       s.code,
+			Freqs:      localFreqs,
+			Observed:   localObserved,
+			InitValues: localInitValues,
+			SmartMode:  s.SmartMode,
+			Weighting:  s.Weighting,
+		}
+
+		res := tempSolver.baseLMSolveStateless()
+
+		if res.Min < bestRes.Min {
+			bestRes = res
+		}
+
+		log.Println("stateless lm iter:", iterations, "res:", res.Min, "bestRes", bestRes.Min)
+
+		if res.Min < minFunc {
+			break
+		} else {
+			localInitValues = modifyParams(res.Params, res.Min > lastMin, primaryInitValues, lastValues, GetElements(s.code))
+		}
+		lastMin = res.Min
+		copy(lastValues, res.Params)
+		iterations++
+	}
+	return bestRes
+}
+
+// baseLMSolveStateless is a thread-safe version that works with local copies
+func (s *Solver) baseLMSolveStateless() Result {
+	log.Println("Stateless Base LM Solve Mode")
+
+	// Work with local copies
+	localFreqs := make([]float64, len(s.Freqs))
+	copy(localFreqs, s.Freqs)
+	localObserved := make([][2]float64, len(s.Observed))
+	copy(localObserved, s.Observed)
+	localInitValues := make([]float64, len(s.InitValues))
+	copy(localInitValues, s.InitValues)
+	localCode := s.code
+	localWeighting := s.Weighting
+
+	callCount := 0
+	fnc := func(dst, x []float64) {
+		callCount++
+		if callCount <= 3 || callCount%100 == 0 {
+			log.Printf("Stateless LM DEBUG: Function call #%d, params: %v", callCount, x)
+		}
+
+		calculated := CircuitImpedance(localCode, localFreqs, x)
+		if len(calculated) != len(localObserved) {
+			panic("stateless solver: slice length mismatch")
+		}
+
+		// Apply CPE exponent constraints during optimization - penalty function for qn element 0<n<1
+		elements := GetElements(localCode)
+		penalty := 0.0
+		for i, elem := range elements {
+			if elem == "qn" && i < len(x) {
+				if x[i] < 0.1 {
+					penalty += 1e6 * math.Pow(0.1-x[i], 2)
+				} else if x[i] > 1.0 {
+					penalty += 1e6 * math.Pow(x[i]-1.0, 2)
+				}
+			}
+		}
+
+		totalError := 0.0
+		for i, o := range localObserved {
+			c := calculated[i]
+			d2 := math.Pow(o[0]-c[0], 2) + math.Pow(o[1]-c[1], 2)
+			if localWeighting == UNITY {
+				dst[i] = math.Abs(d2) + penalty/float64(len(localObserved))
+			} else if localWeighting == MODULUS {
+				weight := math.Sqrt(math.Pow(o[0], 2) + math.Pow(o[1], 2))
+				if weight > 0 {
+					dst[i] = math.Abs(d2)/math.Pow(weight, 2) + penalty/float64(len(localObserved))
+				} else {
+					dst[i] = math.Abs(d2) + penalty/float64(len(localObserved))
+				}
+			}
+			totalError += dst[i]
+		}
+
+		if callCount <= 3 || callCount%100 == 0 {
+			log.Printf("Stateless LM DEBUG: Call #%d total error: %.6e", callCount, totalError)
+		}
+	}
+
+	jac := lm.NumJac{Func: fnc}
+
+	problem := lm.LMProblem{
+		Dim:        len(localInitValues),
+		Size:       len(localObserved),
+		Func:       fnc,
+		Jac:        jac.Jac,
+		InitParams: localInitValues,
+		Tau:        1e-6, // Higher damping for faster convergence
+		Eps1:       1e-6, // Relaxed gradient tolerance
+		Eps2:       1e-6, // Relaxed parameter change tolerance
+	}
+
+	// Debug: Log initial parameters before optimization
+	log.Printf("Stateless LM DEBUG: Initial params: %v", localInitValues)
+	log.Printf("Stateless LM DEBUG: Data points: %d, Param count: %d", len(localObserved), len(localInitValues))
+
+	// Recover from LM panics (e.g., singular matrix)
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Stateless LM optimization panicked: %v", r)
+			log.Printf("Stateless LM DEBUG: Panic occurred, this may cause return of init values")
+		}
+	}()
+
+	res, err := lm.LM(problem, &lm.Settings{
+		Iterations:   10000, // Increased to 1000 iterations for better convergence
+		ObjectiveTol: 1e-8,  // Relaxed from 1e-16 to 1e-8
+	})
+	if err != nil {
+		log.Printf("Stateless LM optimization failed: %v", err)
+		log.Printf("Stateless LM DEBUG: Error occurred, returning init values: %v", localInitValues)
+		return Result{
+			Params:  localInitValues, // Return init values on error for debugging
+			Min:     math.Inf(1),
+			MinUnit: "ChiSq",
+			Runtime: 0,
+			Status:  "ERROR",
+			Payload: nil,
+		}
+	}
+
+	// Debug: Log final parameters after optimization
+	log.Printf("Stateless LM DEBUG: Final params: %v", res.X)
+
+	finalChiSq := ChiSq(localObserved, CircuitImpedance(localCode, localFreqs, res.X), localWeighting)
+	log.Printf("Stateless LM DEBUG: Final ChiSq: %.6e", finalChiSq)
+
+	return Result{
+		Params:  res.X,
+		Min:     finalChiSq,
+		MinUnit: "ChiSq",
+		Runtime: 0,
+		Status:  OK,
+		Iters:   0, // res.Iterations not available in this LM library version
+		Payload: nil,
+	}
+}
+
+// =============================================================================
+// HELPER FUNCTIONS FOR STATELESS OPERATIONS
+// =============================================================================
+
+// prepareDataLocal works on a local copy instead of modifying the receiver
+func prepareDataLocal(impData *[][2]float64) float64 {
+	maxZr := float64(0)
+	// TODO: Think about negative elements
+	for _, v := range *impData {
+		if v[0] > maxZr {
+			maxZr = v[0]
+		}
+	}
+	for i, v := range *impData {
+		(*impData)[i] = [2]float64{v[0] / maxZr, v[1] / maxZr}
+	}
+	return maxZr
+}
+
+// scaleDataLocal works on a local copy instead of modifying the receiver
+func scaleDataLocal(impData *[][2]float64, scale float64) {
+	for i, v := range *impData {
+		(*impData)[i] = [2]float64{v[0] * scale, v[1] * scale}
+	}
+}
+
+// findInitValuesLocal is a stateless version that doesn't use receiver state
+func (s *Solver) findInitValuesLocal(freqs []float64, impData [][2]float64) []float64 {
+	initValues := make([]float64, 0)
+
+	// Extract impedance characteristics from data
+	highFreqR := s.estimateHighFrequencyResistanceLocal(freqs, impData)
+	lowFreqR := s.estimateLowFrequencyResistanceLocal(freqs, impData)
+	capacitance := s.estimateCapacitanceLocal(freqs, impData)
+	inductance := s.estimateInductanceLocal(freqs, impData)
+	warburgCoeff := s.estimateWarburgCoefficientLocal(freqs, impData)
+	cpeParams := s.estimateCPEParametersLocal(freqs, impData)
+
+	for _, char := range s.code {
+		switch char {
+		case 114: // R
+			// Use high frequency intercept for series resistance or polarization resistance
+			resistance := highFreqR
+			if resistance <= 0 {
+				resistance = lowFreqR
+			}
+			if resistance <= 0 {
+				resistance = impData[len(impData)/2][0] // fallback to mid-frequency real part
+			}
+			initValues = append(initValues, resistance)
+		case 99: // C
+			// Use estimated capacitance from slope analysis
+			if capacitance > 0 {
+				initValues = append(initValues, capacitance)
+			} else {
+				initValues = append(initValues, 1e-5) // fallback
+			}
+		case 108: // L
+			// Use estimated inductance from high frequency behavior
+			if inductance > 0 {
+				initValues = append(initValues, inductance)
+			} else {
+				initValues = append(initValues, 1e-6) // fallback
+			}
+		case 119: // W (Infinite Warburg)
+			// Use estimated Warburg coefficient from low frequency slope
+			if warburgCoeff > 0 {
+				initValues = append(initValues, warburgCoeff)
+			} else {
+				initValues = append(initValues, 1e-3) // fallback
+			}
+		case 113: // Q (CPE)
+			// Use estimated CPE parameters Y0 and n
+			if cpeParams[0] > 0 {
+				initValues = append(initValues, cpeParams[0]) // Y0
+			} else {
+				initValues = append(initValues, 1e-5) // fallback Y0
+			}
+			if cpeParams[1] > 0.1 && cpeParams[1] < 1.0 {
+				initValues = append(initValues, cpeParams[1]) // n
+			} else {
+				initValues = append(initValues, 0.8) // fallback n
+			}
+		case 111: // O (FLW Finite Length Warburg) first parameter Y0, second B
+			// Estimate from low frequency Warburg behavior
+			y0 := warburgCoeff * math.Sqrt(2)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[0])) // B related to diffusion length
+		case 116: // T (FSW Finite Space Warburg) first parameter Y0, second B
+			// Similar to FLW but different geometry
+			y0 := warburgCoeff * math.Sqrt(2)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[0]))
+		case 103: // G (Gerischer) first parameter Y0, second k
+			// Estimate from impedance magnitude and characteristic frequency
+			y0 := 1.0 / (lowFreqR - highFreqR)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[len(freqs)/2])) // k related to reaction rate
+		case 102: // F (Fractal Gerischer) first parameter Y0, second k, third a
+			// Similar to Gerischer with additional fractal dimension
+			y0 := 1.0 / (lowFreqR - highFreqR)
+			if y0 <= 0 {
+				y0 = 1e-3
+			}
+			initValues = append(initValues, y0)
+			initValues = append(initValues, math.Sqrt(freqs[len(freqs)/2]))
+			initValues = append(initValues, 0.5) // fractal dimension typically 0.5
+		}
+	}
+	log.Println("Stateless data-driven init values:", initValues)
+	return initValues
+}
+
+// Local versions of estimation functions that work on provided data
+func (s *Solver) estimateHighFrequencyResistanceLocal(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 3 {
+		return 0
+	}
+	start := int(float64(len(impData)) * 0.9)
+	if start < 0 {
+		start = 0
+	}
+	sum := 0.0
+	count := 0
+	for i := start; i < len(impData); i++ {
+		sum += impData[i][0]
+		count++
+	}
+	if count > 0 {
+		return sum / float64(count)
+	}
+	return impData[len(impData)-1][0]
+}
+
+func (s *Solver) estimateLowFrequencyResistanceLocal(freqs []float64, impData [][2]float64) float64 {
+	if len(impData) < 3 {
+		return 0
+	}
+	end := int(float64(len(impData)) * 0.1)
+	if end < 1 {
+		end = 1
+	}
+	sum := 0.0
+	count := 0
+	for i := 0; i < end; i++ {
+		sum += impData[i][0]
+		count++
+	}
+	if count > 0 {
+		return sum / float64(count)
+	}
+	return impData[0][0]
+}
+
+func (s *Solver) estimateCapacitanceLocal(freqs []float64, impData [][2]float64) float64 {
+	// Same implementation as original but working on local data
+	return s.estimateCapacitance(freqs, impData)
+}
+
+func (s *Solver) estimateInductanceLocal(freqs []float64, impData [][2]float64) float64 {
+	// Same implementation as original but working on local data
+	return s.estimateInductance(freqs, impData)
+}
+
+func (s *Solver) estimateWarburgCoefficientLocal(freqs []float64, impData [][2]float64) float64 {
+	// Same implementation as original but working on local data
+	return s.estimateWarburgCoefficient(freqs, impData)
+}
+
+func (s *Solver) estimateCPEParametersLocal(freqs []float64, impData [][2]float64) [2]float64 {
+	// Same implementation as original but working on local data
+	return s.estimateCPEParameters(freqs, impData)
 }

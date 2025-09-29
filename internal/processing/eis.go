@@ -17,7 +17,9 @@ const (
 )
 
 // EISProcessor handles EIS data processing
-type EISProcessor struct{}
+type EISProcessor struct {
+	// No shared state - each processor instance is independent
+}
 
 // NewEISProcessor creates a new EIS processor
 func NewEISProcessor() *EISProcessor {
@@ -42,10 +44,13 @@ func (p *EISProcessor) Process(freqs []float64, impData [][2]float64, cfg *confi
 
 	code := strings.ToLower(cfg.Code)
 
+	// Use original version with shared state (for comparison)
 	return p.runSingleOptimizationMethod(code, freqs, impData, cfg, cfg.OptimMethod)
 }
 
 func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64, impData [][2]float64, cfg *config.Config, method string) (goimpcore.Result, error) {
+	// Create a new solver instance for each call - this should be thread-safe
+	// Each worker will have its own solver instance with no shared state
 	solver := goimpcore.NewSolver(code, freqs, impData)
 
 	// Use provided InitValues or generate data-driven ones
@@ -54,7 +59,7 @@ func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64,
 		log.Printf("Using provided initial values: %v", solver.InitValues)
 	} else {
 		// Use data-driven init values from the solver's analysis
-		solver.InitValues = solver.InitValues // Will be empty, letting solver.Solve() call findInitValues
+		// Will be empty, letting solver.Solve() call findInitValues
 		log.Printf("Using data-driven initial values (will be generated from impedance data)")
 	}
 
@@ -126,6 +131,93 @@ func (p *EISProcessor) runSingleOptimizationMethod(code string, freqs []float64,
 	}
 
 	log.Printf("Processing time: %v", duration)
+	return res, nil
+}
+
+// runSingleOptimizationMethodStateless is a thread-safe version that uses SolveStateless
+func (p *EISProcessor) runSingleOptimizationMethodStateless(code string, freqs []float64, impData [][2]float64, cfg *config.Config, method string) (goimpcore.Result, error) {
+	// Create a new solver instance for each call - fully independent
+	solver := goimpcore.NewSolver(code, freqs, impData)
+
+	// Use provided InitValues or generate data-driven ones
+	if len(cfg.InitValues) > 0 {
+		solver.InitValues = make([]float64, len(cfg.InitValues))
+		copy(solver.InitValues, cfg.InitValues)
+		log.Printf("Using provided initial values: %v", solver.InitValues)
+	} else {
+		// Use data-driven init values from the solver's analysis
+		solver.InitValues = []float64{} // Will be empty, letting SolveStateless call findInitValuesLocal
+		log.Printf("Using data-driven initial values (will be generated from impedance data)")
+	}
+
+	// Method-specific optimization parameters
+	methodMinFunc := 1.35e-2
+	methodMaxIters := 10
+
+	if !cfg.Unity {
+		solver.Weighting = goimpcore.MODULUS
+	}
+
+	// Set the solver method based on the optimization method
+	switch method {
+	case "nelder-mead", "nm":
+		solver.SmartMode = "eis" // Use EIS smart mode for multi-try approach
+		methodMinFunc = 0.0135
+		methodMaxIters = 10
+	case "levenberg-marquardt", "lm":
+		solver.SmartMode = "lm"
+		methodMinFunc = 0.0135
+		methodMaxIters = 10 // Increased from 3 to allow proper convergence
+	default:
+		log.Printf("Unknown optimization method '%s', using Nelder-Mead", method)
+		solver.SmartMode = "eis"
+	}
+
+	log.Printf("Using stateless optimization method: %s", method)
+
+	// Time the optimization with method-specific parameters using STATELESS version
+	startTime := time.Now()
+	res := solver.SolveStateless(methodMinFunc, methodMaxIters)
+	duration := time.Since(startTime)
+
+	log.Printf("Stateless Method %s: minFunc=%.3f, maxIters=%d, actual_chiSq=%.6f", method, methodMinFunc, methodMaxIters, res.Min)
+
+	// Ensure consistent chi-square calculation for all methods
+	// Skip recalculation for EIS mode as it handles scaling internally
+	if res.Status != "ERROR" && len(res.Params) > 0 && (res.MinUnit != "ChiSq" || method != "levenberg-marquardt") && cfg.SmartMode != "eis" {
+		// Debug the recalculation process
+		theoreticalImp := goimpcore.CircuitImpedance(code, freqs, res.Params)
+
+		actualChiSq := goimpcore.ChiSq(impData, theoreticalImp, solver.Weighting)
+		log.Printf("STATELESS DEBUG: ChiSq calculation result: %v (weighting: %v)", actualChiSq, solver.Weighting)
+
+		// Check if recalculation produces NaN
+		if math.IsNaN(actualChiSq) || math.IsInf(actualChiSq, 0) {
+			log.Printf("STATELESS WARNING: Recalculated chi-square is invalid (%v), keeping original result.Min (%v)", actualChiSq, res.Min)
+		} else {
+			log.Printf("STATELESS INFO: Using recalculated chi-square (%v) instead of original (%v)", actualChiSq, res.Min)
+			res.Min = actualChiSq
+			res.MinUnit = "ChiSq"
+		}
+	} else if cfg.SmartMode == "eis" {
+		log.Printf("STATELESS INFO: Skipping chi-square recalculation for EIS mode (scaling handled internally)")
+	}
+
+	if res.Status == "ERROR" {
+		log.Printf("Stateless EIS processing FAILED - Method: %s, Status: %s", method, res.Status)
+	} else {
+		log.Printf("Stateless EIS processing completed - Method: %s, Chi-square: %.14e", method, res.Min)
+	}
+
+	if !cfg.Quiet {
+		if res.Status == "ERROR" {
+			log.Printf("Stateless Method: %s FAILED - Status=%s", method, res.Status)
+		} else {
+			log.Printf("Stateless Method: %s, Min=%.12e, Params=%v, Status=%s", method, res.Min, res.Params, res.Status)
+		}
+	}
+
+	log.Printf("Stateless processing time: %v", duration)
 	return res, nil
 }
 

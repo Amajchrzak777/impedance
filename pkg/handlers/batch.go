@@ -86,35 +86,24 @@ func (h *BatchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *BatchHandler) processBatchAsync(batch models.ImpedanceBatch) {
 	batchStartTime := time.Now()
 	eisMetricsDataResults := make([]models.EISMetricsDataResult, len(batch.Spectra))
-	resultsReceived := 0
-
-	// PROPER BATCH PROCESSING: Process in chunks to avoid queue overflow
-	chunkSize := 50 // Process 50 spectra at a time
 	totalSpectra := len(batch.Spectra)
+	concurrency := h.getConcurrency()
 
-	log.Printf("🔄 Starting chunked batch processing - %d spectra in chunks of %d", totalSpectra, chunkSize)
+	log.Printf("🔄 Starting concurrent batch processing - %d spectra with %d workers", totalSpectra, concurrency)
 
-	for chunkStart := 0; chunkStart < totalSpectra; chunkStart += chunkSize {
-		chunkEnd := chunkStart + chunkSize
-		if chunkEnd > totalSpectra {
-			chunkEnd = totalSpectra
-		}
-
-		currentChunk := batch.Spectra[chunkStart:chunkEnd]
-		log.Printf("📦 Processing chunk %d-%d (%d spectra)", chunkStart, chunkEnd-1, len(currentChunk))
-
-		// Submit current chunk
-		for _, spectrum := range currentChunk {
+	// Submit jobs in streaming fashion to avoid queue overflow
+	// Start a goroutine to submit jobs while workers process them
+	go func() {
+		log.Printf("📦 Submitting %d jobs to worker pool", totalSpectra)
+		for _, spectrum := range batch.Spectra {
 			job := h.createWorkItem(spectrum, *batch.BatchID)
-			h.workerPool.SubmitJob(job)
+			h.workerPool.SubmitJob(job) // This will block if queue is full, providing natural backpressure
 		}
+		log.Printf("✅ All jobs submitted to worker pool")
+	}()
 
-		// Wait for current chunk to complete before submitting next chunk
-		h.waitForChunkCompletion(len(currentChunk), chunkStart, eisMetricsDataResults)
-	}
-
-	log.Printf("✅ All chunks processed successfully")
-	resultsReceived = len(batch.Spectra) // All results processed through chunks
+	// Collect ALL results concurrently
+	resultsReceived := h.collectAllResults(totalSpectra, eisMetricsDataResults)
 
 	if resultsReceived < len(batch.Spectra) {
 		log.Printf("⚠️ Missing results! Expected %d, received %d", len(batch.Spectra), resultsReceived)
@@ -124,7 +113,6 @@ func (h *BatchHandler) processBatchAsync(batch models.ImpedanceBatch) {
 
 	// All results processed and webhooks sent
 	totalBatchTime := time.Since(batchStartTime)
-	concurrency := h.getConcurrency()
 
 	log.Printf("🔄 About to save timing results - BatchID: %s, Duration: %v, Concurrency: %d", *batch.BatchID, totalBatchTime, concurrency)
 
@@ -299,44 +287,44 @@ func (h *BatchHandler) getElementNames(circuitCode string) []string {
 	}
 }
 
-// waitForChunkCompletion waits for a chunk of jobs to complete and processes results
-func (h *BatchHandler) waitForChunkCompletion(chunkSize int, chunkOffset int, eisMetricsDataResults []models.EISMetricsDataResult) {
-	chunkResultsReceived := 0
-	maxWaitTime := time.Minute * 2 // 2 minutes per chunk
-	chunkTimeout := time.Now().Add(maxWaitTime)
+// collectAllResults collects all results concurrently without chunking
+func (h *BatchHandler) collectAllResults(expectedResults int, eisMetricsDataResults []models.EISMetricsDataResult) int {
+	resultsReceived := 0
+	maxWaitTime := time.Minute * 5 // 5 minutes total (scales with job count)
+	timeout := time.Now().Add(maxWaitTime)
 
-	log.Printf("🕐 Waiting for chunk completion: %d results expected", chunkSize)
+	log.Printf("🕐 Collecting %d results concurrently", expectedResults)
 
-	for chunkResultsReceived < chunkSize {
-		if time.Now().After(chunkTimeout) {
-			log.Printf("⚠️ Chunk timeout! Received %d/%d results", chunkResultsReceived, chunkSize)
+	for resultsReceived < expectedResults {
+		if time.Now().After(timeout) {
+			log.Printf("⚠️ Timeout! Received %d/%d results", resultsReceived, expectedResults)
 			break
 		}
 
-		// Drain all available results for this chunk
+		// Drain all available results in batches for efficiency
 		resultsBatch := 0
-		for chunkResultsReceived < chunkSize {
+		for resultsReceived < expectedResults {
 			if result, ok := h.workerPool.GetResult(); ok {
 				// Process result and send webhook immediately
 				h.processResultWithImmediateWebhook(result, eisMetricsDataResults)
-				chunkResultsReceived++
+				resultsReceived++
 				resultsBatch++
 			} else {
-				break // No more results available
+				break // No more results available right now
 			}
 		}
 
 		if resultsBatch > 0 {
-			log.Printf("🚀 CHUNK DRAIN: Processed %d results (%d/%d chunk complete)",
-				resultsBatch, chunkResultsReceived, chunkSize)
+			log.Printf("🚀 BATCH DRAIN: Processed %d results (%d/%d complete)",
+				resultsBatch, resultsReceived, expectedResults)
 		} else {
-			// Wait briefly for more results
-			time.Sleep(10 * time.Millisecond)
+			// Brief sleep to avoid CPU spinning
+			time.Sleep(5 * time.Millisecond)
 		}
 	}
 
-	log.Printf("✅ Chunk %d-%d completed (%d/%d results)",
-		chunkOffset, chunkOffset+chunkSize-1, chunkResultsReceived, chunkSize)
+	log.Printf("✅ Result collection completed: %d/%d results", resultsReceived, expectedResults)
+	return resultsReceived
 }
 
 // calculateElementImpedances calculates impedance for each circuit element (simplified version)
