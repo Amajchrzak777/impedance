@@ -50,9 +50,7 @@ func NewClient(url string, cfg *config.Config) *Client {
 
 		// Disable compression for better performance on small payloads
 		DisableCompression: true,
-
-		// Force HTTP/1.1 for better connection reuse
-		ForceAttemptHTTP2: false,
+		ForceAttemptHTTP2:  false,
 	}
 
 	client := &Client{
@@ -95,39 +93,20 @@ func (c *Client) Send(webhook models.WebhookItem) error {
 		CircuitType:        webhook.CircuitCode,
 	}
 
-	// Get buffer from pool and marshal to JSON
 	buf := c.bufferPool.Get().(*bytes.Buffer)
-	buf.Reset()                 // Clear buffer
-	defer c.bufferPool.Put(buf) // Return to pool
+	buf.Reset()
+	defer c.bufferPool.Put(buf)
 
 	encoder := json.NewEncoder(buf)
 	if err := encoder.Encode(payload); err != nil {
 		return fmt.Errorf("failed to marshal webhook data: %w", err)
 	}
 
-	// Log debug information if not in quiet mode
-	if !c.config.Quiet {
-		log.Printf("DEBUG: Webhook payload - CircuitType: %s, ElementNames: %v",
-			payload.CircuitType, payload.ElementNames)
-	}
-
-	// Send HTTP request with pooled buffer
 	resp, err := c.httpClient.Post(c.url, "application/json", bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		return fmt.Errorf("failed to send webhook: %w", err)
 	}
 	defer resp.Body.Close()
-
-	// Log success if not in quiet mode
-	if !c.config.Quiet {
-		log.Printf("Webhook sent - ID: %s, Chi-square: %.14e, CircuitType: %s, Status: %d",
-			webhook.RequestID, webhook.ChiSquare, webhook.CircuitCode, resp.StatusCode)
-	}
-
-	// Check for HTTP errors
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("webhook request failed with status %d", resp.StatusCode)
-	}
 
 	return nil
 }

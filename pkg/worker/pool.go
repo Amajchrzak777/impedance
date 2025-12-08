@@ -40,20 +40,18 @@ func New(opts Options) *Pool {
 		opts.Workers = 5
 	}
 
-	// Dynamic queue sizes that scale with worker count to prevent contention
-	jobQueueSize := opts.Workers * 20     // 20 jobs per worker buffer
-	resultQueueSize := opts.Workers * 20  // 20 results per worker buffer
-	webhookQueueSize := opts.Workers * 10 // 10 webhooks per worker buffer
+	jobQueueSize := opts.Workers * 20
+	resultQueueSize := opts.Workers * 20
+	webhookQueueSize := opts.Workers * 200
 
-	// Minimum sizes for small worker counts
-	if jobQueueSize < 100 {
-		jobQueueSize = 100
+	if jobQueueSize < 500 {
+		jobQueueSize = 500
 	}
-	if resultQueueSize < 100 {
-		resultQueueSize = 100
+	if resultQueueSize < 500 {
+		resultQueueSize = 500
 	}
-	if webhookQueueSize < 50 {
-		webhookQueueSize = 50
+	if webhookQueueSize < 2000 {
+		webhookQueueSize = 2000
 	}
 
 	pool := &Pool{
@@ -92,10 +90,6 @@ func (p *Pool) start() {
 	// Start webhook processor
 	p.wg.Add(1)
 	go p.webhookProcessor()
-
-	log.Printf("🔧 Worker pool started with %d workers", p.workers)
-	log.Printf("📊 Queue sizes - Jobs: %d, Results: %d, Webhooks: %d",
-		cap(p.jobs), cap(p.results), cap(p.webhookQueue))
 }
 
 // worker processes EIS jobs from the jobs channel
@@ -107,8 +101,6 @@ func (p *Pool) worker(id int) {
 		case job := <-p.jobs:
 			result := p.processJob(job)
 
-			// DRAINAGE FIX: Block until result can be sent - don't drop results
-			// The new drainage system will keep the results queue empty
 			p.results <- result
 
 		case <-p.shutdown:
@@ -129,10 +121,8 @@ func (p *Pool) processJob(job models.WorkItem) models.WorkResult {
 
 	// Process EIS data
 	startTime := time.Now()
-	log.Printf("DEBUG: About to call processor with %d frequencies, config: %+v", len(job.Freqs), job.Config.(*config.Config))
 	result := p.processor(job.Freqs, job.ImpData, job.Config.(*config.Config))
 	processingTime := time.Since(startTime)
-	log.Printf("DEBUG: Processor returned result type: %T, value: %+v", result, result)
 
 	// Extract impedance data with pre-allocated buffers
 	p.extractImpedanceData(job.ImpData, buffers)
@@ -211,24 +201,13 @@ func (p *Pool) webhookProcessor() {
 
 	for {
 		select {
-		case webhook := <-p.webhookQueue:
-			// Process webhook asynchronously without blocking workers
-			go p.sendWebhook(webhook)
-
+		case w := <-p.webhookQueue:
+			if err := p.webhookClient.Send(w); err != nil {
+				log.Printf("Failed to send webhook for %s: %v", w.RequestID, err)
+			}
 		case <-p.shutdown:
 			return
 		}
-	}
-}
-
-// sendWebhook sends webhook using the webhook client
-func (p *Pool) sendWebhook(webhook models.WebhookItem) {
-	log.Printf("Processing webhook for %s", webhook.RequestID)
-
-	if err := p.webhookClient.Send(webhook); err != nil {
-		log.Printf("Failed to send webhook for %s: %v", webhook.RequestID, err)
-	} else {
-		log.Printf("✅ Webhook sent successfully for %s", webhook.RequestID)
 	}
 }
 
@@ -236,10 +215,9 @@ func (p *Pool) sendWebhook(webhook models.WebhookItem) {
 func (p *Pool) SubmitJob(job models.WorkItem) {
 	select {
 	case p.jobs <- job:
-		// Job submitted successfully
 	default:
-		log.Printf("⚠️  Worker pool jobs channel full, job may be delayed")
-		p.jobs <- job // Block until space available
+		//log.Printf("⚠️  Worker pool jobs channel full, job may be delayed")
+		p.jobs <- job
 	}
 }
 
@@ -253,15 +231,22 @@ func (p *Pool) GetResult() (models.WorkResult, bool) {
 	}
 }
 
+// GetResultBlocking retrieves a result from the worker pool (blocking)
+// Blocks until a result is available or timeout occurs
+func (p *Pool) GetResultBlocking(timeout time.Duration) (models.WorkResult, bool) {
+	select {
+	case result := <-p.results:
+		return result, true
+	case <-time.After(timeout):
+		return models.WorkResult{}, false
+	}
+}
+
 // QueueWebhook queues a webhook for async processing
 func (p *Pool) QueueWebhook(webhook models.WebhookItem) {
-	select {
-	case p.webhookQueue <- webhook:
-		// Webhook queued successfully
-	case <-time.After(50 * time.Millisecond):
-		// DEADLOCK FIX: Drop webhook with timeout instead of immediate drop
-		log.Printf("⚠️ Webhook queue full, dropping webhook for %s after timeout", webhook.RequestID)
-	}
+	// Block until webhook can be queued (backpressure)
+	// The webhook queue is now properly sized (2000+ buffer) to handle large batches
+	p.webhookQueue <- webhook
 }
 
 // SendWebhookDirect sends webhook directly without queuing to avoid buffer overflow
@@ -272,7 +257,7 @@ func (p *Pool) SendWebhookDirect(webhook models.WebhookItem) error {
 
 // Shutdown gracefully shuts down the worker pool
 func (p *Pool) Shutdown() {
-	log.Printf("🛑 Shutting down worker pool...")
+	//log.Printf("🛑 Shutting down worker pool...")
 	close(p.shutdown)
 	p.wg.Wait()
 	log.Printf("✅ Worker pool shutdown complete")

@@ -14,14 +14,16 @@ const (
 )
 
 func CircuitImpedance(code string, freqs []float64, values []float64) [][2]float64 {
-	var res [][2]float64
+	// Pre-allocate result slice to avoid repeated allocations during append
+	res := make([][2]float64, 0, len(freqs))
+
 	for _, freq := range freqs {
 		var (
 			mode           = SERIES
-			stack          []complex128
-			fromStack, tmp complex128 = 0, 0
-			i              uint       = 0
-			w                         = 2 * math.Pi * freq
+			stack          []complex128 // Let Go handle this allocation
+			fromStack, tmp complex128   = 0, 0
+			i              uint         = 0
+			w                           = 2 * math.Pi * freq
 		)
 		for _, char := range code {
 			switch char {

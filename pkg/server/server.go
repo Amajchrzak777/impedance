@@ -9,7 +9,6 @@ import (
 	"github.com/kacperjurak/goimpcore/internal/processing"
 	"github.com/kacperjurak/goimpcore/pkg/config"
 	"github.com/kacperjurak/goimpcore/pkg/handlers"
-	"github.com/kacperjurak/goimpcore/pkg/profiling"
 	"github.com/kacperjurak/goimpcore/pkg/webhook"
 	"github.com/kacperjurak/goimpcore/pkg/worker"
 )
@@ -21,9 +20,9 @@ type Server struct {
 	workerPool    *worker.Pool
 	webhookClient *webhook.Client
 	httpServer    *http.Server
-	profiler      *profiling.Profiler
-	middleware    *profiling.Middleware
-	eisProcessor  *processing.EISProcessor
+	//profiler      *profiling.Profiler
+	//middleware    *profiling.Middleware
+	eisProcessor *processing.EISProcessor
 }
 
 // ProcessorFunc defines the signature for EIS data processing
@@ -55,10 +54,6 @@ func New(opts Options) *Server {
 		WebhookClient: webhookClient,
 	})
 
-	// Create profiler and middleware
-	profiler := profiling.New(opts.ServerConfig)
-	middleware := profiling.NewMiddleware(opts.ServerConfig.EnableProfiling)
-
 	// Create EIS processor
 	eisProcessor := processing.NewEISProcessor()
 
@@ -68,8 +63,6 @@ func New(opts Options) *Server {
 		serverConfig:  opts.ServerConfig,
 		workerPool:    workerPool,
 		webhookClient: webhookClient,
-		profiler:      profiler,
-		middleware:    middleware,
 		eisProcessor:  eisProcessor,
 	}
 
@@ -86,11 +79,9 @@ func (s *Server) setupRoutes() {
 	batchHandler := handlers.NewBatchHandler(s.config, s.workerPool, s.getProcessorFunc())
 
 	// Register routes with profiling middleware
-	mux.Handle("/eis-data", s.middleware.ProfiledHandler("eis-single", eisHandler))
-	mux.Handle("/eis-data/batch", s.middleware.ProfiledHandler("eis-batch", batchHandler))
+	mux.Handle("/eis-data", eisHandler)
+	mux.Handle("/eis-data/batch", batchHandler)
 	mux.HandleFunc("/health", s.healthHandler)
-	mux.HandleFunc("/debug/gc", s.gcHandler)
-	mux.HandleFunc("/debug/memory", s.memoryHandler)
 
 	s.httpServer = &http.Server{
 		Addr:         ":" + s.serverConfig.Port,
@@ -121,58 +112,16 @@ func (s *Server) getProcessorFunc() handlers.ProcessorFunc {
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
-}
-
-// gcHandler triggers garbage collection and returns stats
-func (s *Server) gcHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	profiling.ForceGC()
-	stats := profiling.GetGCStats()
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{
-		"gc_runs": %d,
-		"pause_total_ms": %.3f,
-		"pause_recent_us": %.3f,
-		"cpu_percent": %.2f,
-		"last_gc": "%s",
-		"timestamp": "%s"
-	}`,
-		stats.NumGC,
-		float64(stats.PauseTotal.Nanoseconds())/1000000.0,
-		float64(stats.PauseRecent.Nanoseconds())/1000.0,
-		stats.GCCPUPercent,
-		stats.LastGC.Format(time.RFC3339),
-		time.Now().Format(time.RFC3339))
-}
-
-// memoryHandler provides current memory statistics
-func (s *Server) memoryHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	profiling.LogGCStats()
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"message":"Memory stats logged to console","timestamp":"%s"}`,
-		time.Now().Format(time.RFC3339))
+	_, _ = fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
 }
 
 // Start starts the HTTP server
 func (s *Server) Start() error {
-	// Start profiling server
-	if err := s.profiler.Start(); err != nil {
-		log.Printf("❌ Failed to start profiler: %v", err)
-	}
-
 	log.Println("🚀 Starting HTTP server on port", s.serverConfig.Port)
 	log.Println("📡 Endpoints available:")
 	log.Printf("  - Single: http://localhost:%s/eis-data", s.serverConfig.Port)
 	log.Printf("  - Batch:  http://localhost:%s/eis-data/batch", s.serverConfig.Port)
 	log.Printf("  - Health: http://localhost:%s/health", s.serverConfig.Port)
-	log.Printf("  - GC:     http://localhost:%s/debug/gc", s.serverConfig.Port)
-	log.Printf("  - Memory: http://localhost:%s/debug/memory", s.serverConfig.Port)
 
 	return s.httpServer.ListenAndServe()
 }
@@ -180,11 +129,6 @@ func (s *Server) Start() error {
 // Shutdown gracefully shuts down the server
 func (s *Server) Shutdown() error {
 	log.Println("🛑 Shutting down server...")
-
-	// Shutdown profiler
-	if err := s.profiler.Stop(); err != nil {
-		log.Printf("⚠️ Profiler shutdown error: %v", err)
-	}
 
 	// Shutdown worker pool
 	s.workerPool.Shutdown()

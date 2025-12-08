@@ -20,7 +20,7 @@ type BatchItem struct {
 
 // ImpedanceBatch represents a batch of impedance measurements
 type ImpedanceBatch struct {
-	BatchID *string     `json:"batch_id,omitempty"` // Optional - server will generate UUID if nil
+	BatchID *string     `json:"batch_id,omitempty"`
 	Spectra []BatchItem `json:"spectra"`
 }
 
@@ -32,7 +32,7 @@ type WorkItem struct {
 	Iteration int
 	Freqs     []float64
 	ImpData   [][2]float64
-	Config    interface{} // Will be properly typed when config package is created
+	Config    interface{}
 	StartTime time.Time
 }
 
@@ -50,8 +50,7 @@ type WorkResult struct {
 	ImagImp            []float64
 	CircuitCode        string
 	OptimizationMethod string
-	// Generic parameters array - fits any equivalent circuit
-	Parameters []float64
+	Parameters         []float64
 }
 
 // WebhookItem represents a webhook task
@@ -95,8 +94,7 @@ type EISMetricsDataResult struct {
 	Success            bool          `json:"success"`
 	CircuitCode        string        `json:"circuit_code"`
 	OptimizationMethod string        `json:"optimization_method"`
-	// Generic parameters array - fits any equivalent circuit
-	Parameters []float64 `json:"parameters"`
+	Parameters         []float64     `json:"parameters"`
 }
 
 // BufferSet contains reusable buffers to reduce allocations

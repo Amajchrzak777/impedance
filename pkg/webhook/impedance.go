@@ -71,8 +71,8 @@ func (c *Calculator) calculateElementImpedance(elementName string, parameter flo
 
 	case "w": // Warburg
 		if parameter != 0 {
-			sqrt_jw := complex(math.Sqrt(w/2), math.Sqrt(w/2))
-			return complex(1, 0) / (complex(parameter, 0) * sqrt_jw)
+			sqrtJw := complex(math.Sqrt(w/2), math.Sqrt(w/2))
+			return complex(1, 0) / (complex(parameter, 0) * sqrtJw)
 		}
 
 	case "qy": // CPE Y parameter - skip, will be combined with qn
@@ -114,8 +114,8 @@ func (c *Calculator) calculateByFirstChar(elementName string, parameter float64,
 		return complex(0, 1) * complex(w, 0) * complex(parameter, 0)
 	case 'w':
 		if parameter != 0 {
-			sqrt_jw := complex(math.Sqrt(w/2), math.Sqrt(w/2))
-			return complex(1, 0) / (complex(parameter, 0) * sqrt_jw)
+			sqrtJw := complex(math.Sqrt(w/2), math.Sqrt(w/2))
+			return complex(1, 0) / (complex(parameter, 0) * sqrtJw)
 		}
 	}
 

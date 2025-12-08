@@ -1,2 +1,0 @@
-Timestamp,BatchID,TotalSpectra,Concurrency,TotalBatchTime_ms,AvgSpectrumTime_ms,MinSpectrumTime_ms,MaxSpectrumTime_ms,SuccessRate,AvgChiSquare,SpectraPerSecond,EfficiencyScore,CircuitCode,OptimizationMethod
-2025-09-21T13:49:47+02:00,full-csv-batch-1755807888,12,5,367.40,114.34,43.73,271.38,100.0,5.766084e-01,32.66,0.747,R(QR),nelder-mead

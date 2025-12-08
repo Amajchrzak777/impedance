@@ -20,10 +20,11 @@ func main() {
 	processor := processing.NewEISProcessor()
 
 	// Create server configuration
+	defaultServerConfig := config.DefaultServerConfig()
 	serverConfig := &config.ServerConfig{
 		Port:            "8080",
 		WorkerCount:     int(cfg.Threads),
-		WebhookURL:      "http://localhost:3001/webhook",
+		WebhookURL:      defaultServerConfig.WebhookURL, // Auto-detect Docker vs localhost
 		EnableMetrics:   true,
 		EnableProfiling: cfg.EnableProfiling,
 		ProfilingPort:   "6060",

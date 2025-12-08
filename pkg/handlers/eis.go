@@ -67,7 +67,7 @@ func (h *EISHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
+	_ = json.NewEncoder(w).Encode(result)
 }
 
 // processSync handles synchronous processing of EIS data and returns results
@@ -118,7 +118,6 @@ func (h *EISHandler) processSync(requestID string, impedanceData models.Impedanc
 
 // processAsync handles asynchronous processing of EIS data
 func (h *EISHandler) processAsync(requestID string, impedanceData models.ImpedanceData) {
-	// Convert ImpedanceData to internal format
 	freqs := impedanceData.Frequencies
 	impData := make([][2]float64, len(impedanceData.Impedance))
 
@@ -126,10 +125,8 @@ func (h *EISHandler) processAsync(requestID string, impedanceData models.Impedan
 		impData[i] = [2]float64{point["real"], point["imag"]}
 	}
 
-	// Process EIS data
 	_ = h.processor(freqs, impData, h.config)
 
-	// Extract real and imaginary parts for webhook
 	realImp := make([]float64, len(impedanceData.Impedance))
 	imagImp := make([]float64, len(impedanceData.Impedance))
 	for i, imp := range impedanceData.Impedance {
@@ -137,11 +134,9 @@ func (h *EISHandler) processAsync(requestID string, impedanceData models.Impedan
 		imagImp[i] = imp["imag"]
 	}
 
-	// Create webhook item
-	// TODO: Integrate with proper EIS result processing
 	webhook := models.WebhookItem{
 		RequestID:   requestID,
-		ChiSquare:   0.0, // Will be extracted from result
+		ChiSquare:   0.0,
 		RealImp:     realImp,
 		ImagImp:     imagImp,
 		Freqs:       freqs,
